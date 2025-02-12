@@ -24,7 +24,7 @@ public class CohereController : ControllerBase
         {
             model = "command-xlarge-nightly",
             prompt = request.Prompt,
-            max_tokens = 300,
+            max_tokens = 3000,
             temperature = 0.8,
             k = 0,
             p = 0.75,
