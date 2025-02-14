@@ -51,17 +51,41 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Google.Cloud.Translation.V2": {
+              "target": "Package",
+              "version": "[3.4.0, )"
+            },
             "Microsoft.AspNetCore.Mvc": {
               "target": "Package",
               "version": "[2.3.0, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[9.0.1, )"
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
             },
             "Microsoft.EntityFrameworkCore.InMemory": {
               "target": "Package",
-              "version": "[9.0.1, )"
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[112.1.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
