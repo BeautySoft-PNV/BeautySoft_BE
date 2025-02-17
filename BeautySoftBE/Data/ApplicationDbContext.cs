@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using BeautifulShop_BE.Models;
-namespace BeautifulShop_BE.Data
-{
+using BeautySoftBE.Models;
 
+namespace BeautySoftBE.Data
+{
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -45,16 +45,14 @@ namespace BeautifulShop_BE.Data
                 .HasMany(e => e.MakeupItemStyles)
                 .WithOne(e => e.MakeupStyle)
                 .HasForeignKey(e => e.MakeupStyleId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<MakeupItemModel>()
-            //    .HasMany(e => e.MakeupItemStyles)
-            //    .WithOne(e => e.MakeupItem)
-            //    .HasForeignKey(e => e.MakeupItemId)
-            // .OnDelete(DeleteBehavior.NoAction);
-
-
-
+            modelBuilder.Entity<MakeupItemModel>()
+                .HasMany(e => e.MakeupItemStyles)
+                .WithOne(e => e.MakeupItem)
+                .HasForeignKey(e => e.MakeupItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
             modelBuilder.Entity<ManagerStorageModel>()
                 .HasOne(ms => ms.User)
                 .WithMany()

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeautifulShop_BE", "BeautifulShop_BE\BeautifulShop_BE.csproj", "{AAAF5AF5-03FB-4FEE-BC92-1659C201D023}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeautySoftBE", "BeautySoftBE\BeautySoftBE.csproj", "{AAAF5AF5-03FB-4FEE-BC92-1659C201D023}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
