@@ -1,9 +1,12 @@
-
 using Microsoft.EntityFrameworkCore;
 using BeautySoftBE.Data;
+using BeautySoftBE.Repositories;
+using BeautySoftBE.Services;
 
 
-    var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<IMakeupItemService, MakeupItemService>();
+builder.Services.AddScoped<IMakeupItemRepository, MakeupItemRepository>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
