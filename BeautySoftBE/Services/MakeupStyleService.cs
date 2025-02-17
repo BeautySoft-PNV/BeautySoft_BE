@@ -44,4 +44,12 @@ public class MakeupStyleService : IMakeupStyleService
             await _context.SaveChangesAsync();
         }
     }
+    
+    public async Task<IEnumerable<MakeupStyleModel>> GetByUserIdAsync(int userId)
+    {
+        return await _context.MakeupStyles
+            .Where(ms => ms.UserId == userId)
+            .ToListAsync();
+    }
+
 }

@@ -3,6 +3,8 @@ using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BeautySoftBE.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeautySoftBE.Controllers
 {
@@ -11,10 +13,12 @@ namespace BeautySoftBE.Controllers
     public class MakeupItemsController : ControllerBase
     {
         private readonly IMakeupItemService _makeupItemService;
+        private readonly ApplicationDbContext _context;
 
-        public MakeupItemsController(IMakeupItemService makeupItemService)
+        public MakeupItemsController(IMakeupItemService makeupItemService, ApplicationDbContext context)
         {
             _makeupItemService = makeupItemService;
+            _context = context;
         }
 
         [HttpGet]
@@ -35,17 +39,24 @@ namespace BeautySoftBE.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MakeupItemModel>> PostMakeupItem(MakeupItemModel makeupItemDto)
+        public async Task<IActionResult> CreateAsync(MakeupItemModel makeupItem)
         {
-            if (!ModelState.IsValid)
+            if (makeupItem == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest("Dữ liệu không hợp lệ.");
             }
-            var createdItem = await _makeupItemService.CreateAsync(makeupItemDto); // Get the created item from the service
-            return CreatedAtAction("GetMakeupItem", new { id = createdItem.Id }, createdItem); // Return the created item
+
+            var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
+            if (!userExists)
+            {
+                return BadRequest("UserId không tồn tại trong hệ thống.");
+            }
+
+            _context.MakeupItems.Add(makeupItem);
+            await _context.SaveChangesAsync();
+            return Ok(makeupItem);
         }
-
-
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMakeupItem(int id, MakeupItemModel makeupItemDto)
         {

@@ -7,6 +7,8 @@ using BeautySoftBE.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IMakeupItemService, MakeupItemService>();
 builder.Services.AddScoped<IMakeupItemRepository, MakeupItemRepository>();
+builder.Services.AddScoped<IMakeupStyleService, MakeupStyleService>();
+builder.Services.AddScoped<IMakeupItemStyleService, MakeupItemStyleService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

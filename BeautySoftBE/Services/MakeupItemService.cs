@@ -17,4 +17,5 @@ public class MakeupItemService : IMakeupItemService
     public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem) => await _repository.CreateAsync(makeupItem);
     public async Task<bool> UpdateAsync(MakeupItemModel makeupItem) => await _repository.UpdateAsync(makeupItem);
     public async Task<bool> DeleteAsync(int id) => await _repository.DeleteAsync(id);
+    
 }

@@ -12,30 +12,30 @@ namespace BeautySoftBE.Models
         public int UserId { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
+        [StringLength(100, ErrorMessage = "Tên không được dài hơn 100 ký tự.")]
         public string Name { get; set; }
 
         [Required]
-        [StringLength(500, ErrorMessage = "Description cannot be longer than 500 characters.")]
+        [StringLength(500, ErrorMessage = "Mô tả không được dài hơn 500 ký tự.")]
         public string Description { get; set; }
 
-        [Url(ErrorMessage = "Invalid image URL format.")]
+        [Url(ErrorMessage = "Định dạng URL hình ảnh không hợp lệ.")]
         public string Image { get; set; }
 
-        [StringLength(1000, ErrorMessage = "Guidance cannot be longer than 1000 characters.")]
+        [StringLength(1000, ErrorMessage = "Hướng dẫn không được dài hơn 1000 ký tự.")]
         public string Guidance { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
-        [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Invalid Date of Manufacture")]
+        [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Ngày sản xuất không hợp lệ.")]
         public DateTime DateOfManufacture { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
-        [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Invalid Expiration Date")]
+        [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Ngày hết hạn không hợp lệ.")]
         public DateTime ExpirationDate { get; set; }
         public UserModel? User { get; set; }
-        public ICollection<MakeupItemStyleModel> MakeupItemStyles { get; set; }
+        public ICollection<MakeupItemStyleModel>? MakeupItemStyles { get; set; }
         
         public bool IsValidExpirationDate()
         {

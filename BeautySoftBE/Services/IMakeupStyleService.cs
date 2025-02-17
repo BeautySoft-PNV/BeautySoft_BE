@@ -9,4 +9,5 @@ public interface IMakeupStyleService
     Task CreateAsync(MakeupStyleModel makeupStyle);
     Task UpdateAsync(MakeupStyleModel makeupStyle);
     Task DeleteAsync(int id);
+    Task<IEnumerable<MakeupStyleModel>> GetByUserIdAsync(int userId);
 }

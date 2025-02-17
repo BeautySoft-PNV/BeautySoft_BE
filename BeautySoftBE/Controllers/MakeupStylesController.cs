@@ -62,5 +62,18 @@ namespace BeautySoftBE.Controllers
             await _makeupStyleService.DeleteAsync(id);
             return NoContent();
         }
+        
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<MakeupStyleModel>>> GetMakeupStylesByUserId(int userId)
+        {
+            var makeupStyles = await _makeupStyleService.GetByUserIdAsync(userId);
+
+            if (makeupStyles == null || !makeupStyles.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(makeupStyles);
+        }
     }
 }
