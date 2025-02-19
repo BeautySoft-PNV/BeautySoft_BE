@@ -3,6 +3,7 @@ using BeautySoftBE.Models;
 using BeautySoftBE.Services;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BeautySoftBE.Controllers
 {
