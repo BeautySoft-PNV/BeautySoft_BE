@@ -11,7 +11,11 @@ public class MakeupItemService : IMakeupItemService
     {
         _repository = repository;
     }
-
+    public async Task<IEnumerable<MakeupItemModel>> GetByUserIdAsync(int userId)
+    {
+        return await _repository.GetByUserIdAsync(userId);
+    }
+    
     public async Task<IEnumerable<MakeupItemModel>> GetAllAsync() => await _repository.GetAllAsync();
     public async Task<MakeupItemModel> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
     public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem) => await _repository.CreateAsync(makeupItem);

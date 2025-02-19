@@ -56,4 +56,11 @@ public class MakeupItemRepository : IMakeupItemRepository
         await _context.SaveChangesAsync();
         return true;
     }
+    
+    public async Task<IEnumerable<MakeupItemModel>> GetByUserIdAsync(int userId)
+    {
+        return await _context.MakeupItems
+            .Where(item => item.UserId == userId)
+            .ToListAsync();
+    }
 }

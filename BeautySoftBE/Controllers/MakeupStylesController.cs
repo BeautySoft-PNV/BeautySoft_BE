@@ -3,6 +3,7 @@ using BeautySoftBE.Models;
 using BeautySoftBE.Services;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BeautySoftBE.Controllers
@@ -64,9 +65,16 @@ namespace BeautySoftBE.Controllers
             return NoContent();
         }
         
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<MakeupStyleModel>>> GetMakeupStylesByUserId(int userId)
+        [HttpGet("user/me")]
+        public async Task<ActionResult<IEnumerable<MakeupStyleModel>>> GetMyMakeupStyles()
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
             var makeupStyles = await _makeupStyleService.GetByUserIdAsync(userId);
 
             if (makeupStyles == null || !makeupStyles.Any())

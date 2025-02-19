@@ -9,4 +9,5 @@ public interface IMakeupItemRepository
     Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem);
     Task<bool> UpdateAsync(MakeupItemModel makeupItem);
     Task<bool> DeleteAsync(int id);
+    Task<IEnumerable<MakeupItemModel>> GetByUserIdAsync(int userId);
 }

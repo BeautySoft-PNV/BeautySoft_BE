@@ -2,6 +2,7 @@
 using BeautySoftBE.Models;
 using BeautySoftBE.Services;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BeautySoftBE.Controllers
@@ -17,10 +18,18 @@ namespace BeautySoftBE.Controllers
             _makeupItemStyleService = makeupItemStyleService;
         }
         
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<MakeupItemStyleModel>>> GetMakeupItemStylesByUserId(int userId)
+        [HttpGet("user/me")]
+        public async Task<ActionResult<IEnumerable<MakeupItemStyleModel>>> GetMyMakeupItemStyles()
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
             var makeupItemStyles = await _makeupItemStyleService.GetByUserIdAsync(userId);
+
             return Ok(makeupItemStyles);
         }
         

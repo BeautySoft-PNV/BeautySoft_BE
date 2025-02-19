@@ -2,6 +2,7 @@
 using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BeautySoftBE.Data;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,26 @@ namespace BeautySoftBE.Controllers
                 return NotFound();
             }
             return Ok(makeupItem);
+        }
+        
+        [HttpGet("user/me")]
+        public async Task<ActionResult<IEnumerable<MakeupItemModel>>> GetMyMakeupItems()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(); 
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+            var makeupItems = await _makeupItemService.GetByUserIdAsync(userId);
+
+            if (makeupItems == null || !makeupItems.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(makeupItems);
         }
 
         [HttpPost]
