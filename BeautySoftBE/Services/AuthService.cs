@@ -79,6 +79,7 @@ public class AuthService : IAuthService
         {
             Subject = new ClaimsIdentity(new[]
             {
+                new Claim("id", user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email ?? "Unknown"), 
                 new Claim(ClaimTypes.Role, role)
             }),

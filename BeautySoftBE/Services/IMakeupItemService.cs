@@ -10,4 +10,6 @@ public interface IMakeupItemService
     Task<bool> UpdateAsync(MakeupItemModel makeupItem);
     Task<bool> DeleteAsync(int id);
     Task<IEnumerable<MakeupItemModel>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<MakeupItemModel>> SearchByNameAsync(string name);
+
 }

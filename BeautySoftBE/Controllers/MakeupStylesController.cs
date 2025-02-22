@@ -61,7 +61,25 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupStyle(int id)
         {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized("Không tìm thấy mã thông báo hoặc ID người dùng không hợp lệ.");
+            }
+            
+            var makeupStyle = await _makeupStyleService.GetByIdAsync(id);
+            if (makeupStyle == null)
+            {
+                return NotFound("Không tìm thấy phong cách trang điểm.");
+            }
+            
+            if (makeupStyle.UserId != userId)
+            {
+                return Forbid("Phong cách này không thuộc về bạn.");
+            }
+            
             await _makeupStyleService.DeleteAsync(id);
+
             return NoContent();
         }
         
