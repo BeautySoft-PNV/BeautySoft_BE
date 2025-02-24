@@ -9,7 +9,7 @@ namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MakeupItemStyleController : ControllerBase
+    public class MakeupItemStyleController : BaseController
     {
         private readonly IMakeupItemStyleService _makeupItemStyleService;
 
@@ -21,14 +21,18 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupItemStyleModel>>> GetMyMakeupItemStyles()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var userId = GetUserIdFromToken();
+            if (!userId.HasValue)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Không thể xác định UserId từ token." });
             }
 
-            int userId = int.Parse(userIdClaim.Value);
-            var makeupItemStyles = await _makeupItemStyleService.GetByUserIdAsync(userId);
+            var makeupItemStyles = await _makeupItemStyleService.GetByUserIdAsync(userId.Value);
+
+            if (makeupItemStyles == null || !makeupItemStyles.Any())
+            {
+                return NotFound(new { message = "Không tìm thấy phong cách trang điểm nào." });
+            }
 
             return Ok(makeupItemStyles);
         }

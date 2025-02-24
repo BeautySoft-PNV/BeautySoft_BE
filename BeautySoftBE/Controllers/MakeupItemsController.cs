@@ -12,7 +12,7 @@ namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MakeupItemsController : ControllerBase
+    public class MakeupItemsController : BaseController
     {
         private readonly IMakeupItemService _makeupItemService;
         private readonly ApplicationDbContext _context;
@@ -30,36 +30,28 @@ namespace BeautySoftBE.Controllers
             return Ok(await _makeupItemService.GetAllAsync());
         }
 
-        [HttpGet]
-        public async Task<ActionResult<MakeupItemModel>> GetMakeupItem()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<MakeupItemModel>> GetMakeupItem(int id)
         {
-            var userIdClaim = HttpContext.User.FindFirst("id");
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return Unauthorized("Invalid token or user ID not found.");
-            }
-
-            var makeupItem = await _makeupItemService.GetByIdAsync(userId);
+            var makeupItem = await _makeupItemService.GetByIdAsync(id);
             if (makeupItem == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Không tìm thấy Makeup Item." });
             }
-    
+
             return Ok(makeupItem);
         }
         
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupItemModel>>> GetMyMakeupItems()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var userId = GetUserIdFromToken();
+            if (userId == null)
             {
-                return Unauthorized(); 
+                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
             }
 
-            int userId = int.Parse(userIdClaim.Value);
-            var makeupItems = await _makeupItemService.GetByUserIdAsync(userId);
-
+            var makeupItems = await _makeupItemService.GetByUserIdAsync(userId.Value);
             if (makeupItems == null || !makeupItems.Any())
             {
                 return NotFound();
@@ -95,15 +87,15 @@ namespace BeautySoftBE.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userIdClaim = HttpContext.User.FindFirst("id");
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            var userId = GetUserIdFromToken();
+            if (userId == null)
             {
-                return Unauthorized("Invalid token or user ID not found.");
+                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
             }
 
-            if (userId != makeupItemDto.Id)
+            if (userId.Value != makeupItemDto.UserId)
             {
-                return Forbid("You can only update your own makeup item.");
+                return Forbid("Bạn chỉ có thể cập nhật sản phẩm của chính mình.");
             }
 
             var result = await _makeupItemService.UpdateAsync(makeupItemDto);
@@ -118,22 +110,22 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupItem(int id)
         {
-            var userIdClaim = HttpContext.User.FindFirst("id");
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            var userId = GetUserIdFromToken();
+            if (userId == null)
             {
-                return Unauthorized("Không tìm thấy mã thông báo hoặc ID người dùng không hợp lệ.");
+                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
             }
 
             var makeupItem = await _makeupItemService.GetByIdAsync(id);
             if (makeupItem == null || makeupItem.UserId != userId)
             {
-                return NotFound("Không tìm thấy sản phẩm trang điểm hoặc sản phẩm đó không phải của bạn.");
+                return NotFound("Không tìm thấy sản phẩm hoặc sản phẩm này không thuộc về bạn.");
             }
             
             var result = await _makeupItemService.DeleteAsync(id);
             if (!result)
             {
-                return BadRequest("Không xóa được item");
+                return BadRequest("Không thể xóa sản phẩm.");
             }
 
             return NoContent();
@@ -155,6 +147,5 @@ namespace BeautySoftBE.Controllers
 
             return Ok(items);
         }
-
     }
 }

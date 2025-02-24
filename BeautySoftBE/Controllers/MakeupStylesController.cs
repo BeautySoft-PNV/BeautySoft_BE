@@ -10,7 +10,7 @@ namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MakeupStylesController : ControllerBase
+    public class MakeupStylesController : BaseController 
     {
         private readonly IMakeupStyleService _makeupStyleService;
 
@@ -46,14 +46,21 @@ namespace BeautySoftBE.Controllers
             return CreatedAtAction(nameof(GetMakeupStyle), new { id = makeupStyle.Id }, makeupStyle);
         }
         
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMakeupStyle(int id, MakeupStyleModel makeupStyle)
+        [HttpPut("update")]
+        public async Task<IActionResult> PutMakeupStyle([FromBody] MakeupStyleModel makeupStyle)
         {
-            if (id != makeupStyle.Id)
+            var userId = GetUserIdFromToken();
+            if (userId == null)
             {
-                return BadRequest();
+                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
             }
-
+            
+            var existingStyle = await _makeupStyleService.GetByIdAsync(makeupStyle.Id);
+            if (existingStyle == null || existingStyle.UserId != userId)
+            {
+                return NotFound(new { message = "MakeupStyle không tồn tại hoặc không thuộc về người dùng này" });
+            }
+            
             await _makeupStyleService.UpdateAsync(makeupStyle);
             return NoContent();
         }
@@ -61,10 +68,10 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupStyle(int id)
         {
-            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            var userId = GetUserIdFromToken();
+            if (userId == null)
             {
-                return Unauthorized("Không tìm thấy mã thông báo hoặc ID người dùng không hợp lệ.");
+                return Unauthorized(new { message = "Không thể xác định UserId từ token." });
             }
             
             var makeupStyle = await _makeupStyleService.GetByIdAsync(id);
@@ -86,21 +93,20 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupStyleModel>>> GetMyMakeupStyles()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var userId = GetUserIdFromToken(); 
+            if (userId == null)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
             }
 
-            int userId = int.Parse(userIdClaim.Value);
-            var makeupStyles = await _makeupStyleService.GetByUserIdAsync(userId);
-
+            var makeupStyles = await _makeupStyleService.GetByUserIdAsync(userId.Value);
             if (makeupStyles == null || !makeupStyles.Any())
             {
-                return NotFound();
+                return NotFound(new { message = "Không tìm thấy phong cách trang điểm nào" });
             }
 
             return Ok(makeupStyles);
         }
+
     }
 }
