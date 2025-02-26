@@ -10,7 +10,7 @@ namespace BeautySoftBE.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private readonly IUserService _userService;
 
@@ -54,12 +54,6 @@ namespace BeautySoftBE.Controllers
             if (!result) return NotFound("Không tìm thấy người dùng để xóa.");
 
             return NoContent();
-        }
-
-        private int? GetUserIdFromToken()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            return userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId) ? userId : null;
         }
     }
 }

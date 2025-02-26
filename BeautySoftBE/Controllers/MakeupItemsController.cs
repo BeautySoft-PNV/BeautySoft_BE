@@ -132,12 +132,12 @@ namespace BeautySoftBE.Controllers
         }
         
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<MakeupItemModel>>> SearchMakeupItems([FromQuery] string name)
+        public async Task<ActionResult<IEnumerable<MakeupItemModel>>> SearchMakeupItems([FromQuery] string? name)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            /*if (string.IsNullOrWhiteSpace(name))
             {
                 return BadRequest("Tên tìm kiếm không được để trống.");
-            }
+            }*/
 
             var items = await _makeupItemService.SearchByNameAsync(name);
             if (items == null || !items.Any())

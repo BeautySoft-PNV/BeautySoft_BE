@@ -20,13 +20,12 @@ public class MakeupItemService : IMakeupItemService
     {
         return await _repository.GetByUserIdAsync(userId);
     }
-    public async Task<IEnumerable<MakeupItemModel>> SearchByNameAsync(string name)
+    public async Task<IEnumerable<MakeupItemModel>> SearchByNameAsync(string? name)
     {
         return await _context.MakeupItems
-            .Where(m => m.Name.Contains(name))
+            .Where(m => string.IsNullOrEmpty(name) || m.Name.Contains(name))
             .ToListAsync();
     }
-
     
     public async Task<IEnumerable<MakeupItemModel>> GetAllAsync() => await _repository.GetAllAsync();
     public async Task<MakeupItemModel> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
