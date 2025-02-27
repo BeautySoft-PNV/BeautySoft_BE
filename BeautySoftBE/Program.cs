@@ -32,16 +32,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMakeupItemService, MakeupItemService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IMakeupItemRepository, MakeupItemRepository>();
 builder.Services.AddScoped<IMakeupStyleService, MakeupStyleService>();
 builder.Services.AddScoped<IMakeupItemStyleService, MakeupItemStyleService>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddSingleton<FirebaseStorageService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
@@ -50,24 +52,17 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/ spnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-// Bật CORS trước Authentication và Authorization
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapStaticAssets();
-
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 app.Run();

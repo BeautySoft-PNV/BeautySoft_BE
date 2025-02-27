@@ -9,7 +9,7 @@ public class BaseController : ControllerBase
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         if (identity != null)
         {
-            var userIdClaim = identity.FindFirst("id"); // Lấy UserId từ claim "id"
+            var userIdClaim = identity.FindFirst("id");
             if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
             {
                 return userId;

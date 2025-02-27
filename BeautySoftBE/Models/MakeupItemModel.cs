@@ -20,7 +20,7 @@ namespace BeautySoftBE.Models
         public string Description { get; set; }
 
         [Url(ErrorMessage = "Định dạng URL hình ảnh không hợp lệ.")]
-        public string Image { get; set; }
+        public string? Image { get; set; }
 
         [StringLength(1000, ErrorMessage = "Hướng dẫn không được dài hơn 1000 ký tự.")]
         public string Guidance { get; set; }

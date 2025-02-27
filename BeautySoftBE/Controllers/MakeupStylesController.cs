@@ -40,14 +40,14 @@ namespace BeautySoftBE.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle(MakeupStyleModel makeupStyle)
+        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle(MakeupStyleModel makeupStyle, IFormFile imageFile)
         {
-            await _makeupStyleService.CreateAsync(makeupStyle);
+            await _makeupStyleService.CreateAsync(makeupStyle, imageFile);
             return CreatedAtAction(nameof(GetMakeupStyle), new { id = makeupStyle.Id }, makeupStyle);
         }
         
         [HttpPut("update")]
-        public async Task<IActionResult> PutMakeupStyle([FromBody] MakeupStyleModel makeupStyle)
+        public async Task<IActionResult> PutMakeupStyle([FromBody] MakeupStyleModel makeupStyle, IFormFile imageFile)
         {
             var userId = GetUserIdFromToken();
             if (userId == null)
@@ -61,7 +61,7 @@ namespace BeautySoftBE.Controllers
                 return NotFound(new { message = "MakeupStyle không tồn tại hoặc không thuộc về người dùng này" });
             }
             
-            await _makeupStyleService.UpdateAsync(makeupStyle);
+            await _makeupStyleService.UpdateAsync(makeupStyle, imageFile);
             return NoContent();
         }
         

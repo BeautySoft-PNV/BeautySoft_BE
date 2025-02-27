@@ -2,7 +2,7 @@ namespace BeautySoftBE.Models
 {
     public class ManagerStorageModel
     {
-        public int Id { get; set; }
+        public int Id { get; set; } 
         public int UserId { get; set; }
         public int TypeStorageId { get; set; }
         public DateTime DateTimeStart { get; set; }

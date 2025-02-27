@@ -61,26 +61,21 @@ namespace BeautySoftBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(MakeupItemModel makeupItem)
+        public async Task<IActionResult> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
         {
-            if (makeupItem == null)
+            try
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                var createdItem = await _makeupItemService.CreateAsync(makeupItem, imageFile);
+                return Ok(createdItem);
             }
-
-            var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
-            if (!userExists)
+            catch (Exception ex)
             {
-                return BadRequest("UserId không tồn tại trong hệ thống.");
+                return BadRequest(ex.Message);
             }
-
-            _context.MakeupItems.Add(makeupItem);
-            await _context.SaveChangesAsync();
-            return Ok(makeupItem);
         }
         
         [HttpPut]
-        public async Task<IActionResult> PutMakeupItem(MakeupItemModel makeupItemDto)
+        public async Task<IActionResult> PutMakeupItem(MakeupItemModel makeupItemDto, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
             {
@@ -98,7 +93,7 @@ namespace BeautySoftBE.Controllers
                 return Forbid("Bạn chỉ có thể cập nhật sản phẩm của chính mình.");
             }
 
-            var result = await _makeupItemService.UpdateAsync(makeupItemDto);
+            var result = await _makeupItemService.UpdateAsync(makeupItemDto, imageFile);
             if (!result)
             {
                 return NotFound();
@@ -134,11 +129,6 @@ namespace BeautySoftBE.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<MakeupItemModel>>> SearchMakeupItems([FromQuery] string? name)
         {
-            /*if (string.IsNullOrWhiteSpace(name))
-            {
-                return BadRequest("Tên tìm kiếm không được để trống.");
-            }*/
-
             var items = await _makeupItemService.SearchByNameAsync(name);
             if (items == null || !items.Any())
             {

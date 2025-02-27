@@ -32,13 +32,13 @@ namespace BeautySoftBE.Controllers
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserModel user)
+        public async Task<IActionResult> UpdateUser([FromBody] UserModel user, IFormFile imageFile)
         {
             var userId = GetUserIdFromToken();
             if (userId == null) return Unauthorized("Token không hợp lệ.");
 
             user.Id = userId.Value;
-            var result = await _userService.UpdateAsync(user);
+            var result = await _userService.UpdateAsync(user, imageFile);
             if (!result) return NotFound("Không tìm thấy người dùng để cập nhật.");
 
             return NoContent();

@@ -7,6 +7,7 @@ namespace BeautySoftBE.Services;
 public class MakeupStyleService : IMakeupStyleService
 {
     private readonly ApplicationDbContext _context;
+    private readonly FirebaseStorageService _firebaseStorageService;
 
     public MakeupStyleService(ApplicationDbContext context)
     {
@@ -23,14 +24,32 @@ public class MakeupStyleService : IMakeupStyleService
         return await _context.MakeupStyles.FindAsync(id);
     }
 
-    public async Task CreateAsync(MakeupStyleModel makeupStyle)
+    public async Task CreateAsync(MakeupStyleModel makeupStyle, IFormFile imageFile)
     {
+        if (makeupStyle == null)
+        {
+            throw new ArgumentNullException(nameof(makeupStyle), "Dữ liệu không hợp lệ.");
+        }
+
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            using var stream = imageFile.OpenReadStream();
+            var imageUrl = await _firebaseStorageService.UploadImageAsync(stream, imageFile.FileName);
+            makeupStyle.Image = imageUrl;
+        }
+        
         await _context.MakeupStyles.AddAsync(makeupStyle);
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(MakeupStyleModel makeupStyle)
+    public async Task UpdateAsync(MakeupStyleModel makeupStyle, IFormFile imageFile)
     {
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            using var stream = imageFile.OpenReadStream();
+            var imageUrl = await _firebaseStorageService.UploadImageAsync(stream, imageFile.FileName);
+            makeupStyle.Image = imageUrl;
+        }
         _context.MakeupStyles.Update(makeupStyle);
         await _context.SaveChangesAsync();
     }

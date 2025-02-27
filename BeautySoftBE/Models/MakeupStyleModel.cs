@@ -25,7 +25,6 @@ namespace BeautySoftBE.Models
 
         [ForeignKey(nameof(UserId))]
         public UserModel? User { get; set; }
-
         public ICollection<MakeupItemStyleModel>? MakeupItemStyles { get; set; }
     }
 }
