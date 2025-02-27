@@ -39,6 +39,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMakeupStyleService, MakeupStyleService>();
 builder.Services.AddScoped<IMakeupItemStyleService, MakeupItemStyleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
