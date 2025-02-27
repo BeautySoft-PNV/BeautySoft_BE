@@ -1,4 +1,4 @@
-namespace BeautySoftBE.Models
+namespace BeautifulShop_BE.Models
 {
     public class PaymentModel
     {

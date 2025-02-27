@@ -104,9 +104,7 @@ namespace BeautySoftBE.Controllers
             {
                 return NotFound(new { message = "Không tìm thấy phong cách trang điểm nào" });
             }
-
             return Ok(makeupStyles);
         }
-
     }
 }
