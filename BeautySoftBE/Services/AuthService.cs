@@ -28,7 +28,6 @@ public class AuthService : IAuthService
         {
             return "Tài khoản đã tồn tại!";
         }
-
         var user = new UserModel
         {
             Name = model.Username,
