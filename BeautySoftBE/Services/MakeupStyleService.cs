@@ -1,4 +1,5 @@
-﻿using BeautySoftBE.Data;
+﻿
+using BeautySoftBE.Data;
 using BeautySoftBE.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +8,6 @@ namespace BeautySoftBE.Services;
 public class MakeupStyleService : IMakeupStyleService
 {
     private readonly ApplicationDbContext _context;
-    private readonly FirebaseStorageService _firebaseStorageService;
 
     public MakeupStyleService(ApplicationDbContext context)
     {
@@ -24,35 +24,92 @@ public class MakeupStyleService : IMakeupStyleService
         return await _context.MakeupStyles.FindAsync(id);
     }
 
-    public async Task CreateAsync(MakeupStyleModel makeupStyle, IFormFile imageFile)
+    public async Task CreateAsync(MakeupStyleModel makeupStyle)
     {
         if (makeupStyle == null)
         {
             throw new ArgumentNullException(nameof(makeupStyle), "Dữ liệu không hợp lệ.");
         }
-
-        if (imageFile != null && imageFile.Length > 0)
-        {
-            using var stream = imageFile.OpenReadStream();
-            var imageUrl = await _firebaseStorageService.UploadImageAsync(stream, imageFile.FileName);
-            makeupStyle.Image = imageUrl;
-        }
         
+        /*if (imageFile != null && imageFile.Length > 0)
+        {
+            try
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+                
+                makeupStyle.Image = $"/uploads/{uniqueFileName}";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lưu ảnh vào server", ex);
+            }
+        }*/
+
         await _context.MakeupStyles.AddAsync(makeupStyle);
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(MakeupStyleModel makeupStyle, IFormFile imageFile)
+    /*public async Task UpdateAsync(MakeupStyleModel makeupStyle)
     {
+        var existingStyle = await _context.MakeupStyles.FindAsync(makeupStyle.Id);
+        if (existingStyle == null)
+        {
+            throw new KeyNotFoundException("Không tìm thấy phong cách trang điểm.");
+        }
+        
+        existingStyle.Guidance = makeupStyle.Guidance;
+        
         if (imageFile != null && imageFile.Length > 0)
         {
-            using var stream = imageFile.OpenReadStream();
-            var imageUrl = await _firebaseStorageService.UploadImageAsync(stream, imageFile.FileName);
-            makeupStyle.Image = imageUrl;
+            try
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+                
+                if (!string.IsNullOrEmpty(existingStyle.Image))
+                {
+                    string oldFilePath = Path.Combine(uploadsFolder, Path.GetFileName(existingStyle.Image));
+                    if (File.Exists(oldFilePath))
+                    {
+                        File.Delete(oldFilePath);
+                    }
+                }
+
+                // Cập nhật đường dẫn ảnh mới
+                existingStyle.Image = $"/uploads/{uniqueFileName}";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi cập nhật ảnh trên server", ex);
+            }
         }
-        _context.MakeupStyles.Update(makeupStyle);
+
+        _context.MakeupStyles.Update(existingStyle);
         await _context.SaveChangesAsync();
-    }
+    }*/
 
     public async Task DeleteAsync(int id)
     {

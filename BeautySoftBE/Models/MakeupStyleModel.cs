@@ -11,13 +11,9 @@ namespace BeautySoftBE.Models
         [Required(ErrorMessage = "UserId không được để trống.")]
         public int UserId { get; set; }
 
-        [Required(ErrorMessage = "Tên không được để trống.")]
-        [StringLength(100, ErrorMessage = "Tên không được vượt quá 100 ký tự.")]
-        public string Name { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Ảnh không được để trống.")]
         [StringLength(255, ErrorMessage = "URL ảnh không được vượt quá 255 ký tự.")]
-        public string Image { get; set; } = string.Empty;
+        public string? Image { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Hướng dẫn không được để trống.")]
         [StringLength(500, ErrorMessage = "Hướng dẫn không được vượt quá 500 ký tự.")]

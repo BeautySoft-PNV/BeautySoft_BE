@@ -1,121 +1,88 @@
 ﻿using BeautySoftBE.Data;
 using BeautySoftBE.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using BeautySoftBE.Utils;
 
 namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentController : BaseController
+    public class PaymentController : Controller
     {
+        private readonly IPaymentService _paymentService;
+        private readonly IPaymentService _vnPayService;
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-
-        public PaymentController(ApplicationDbContext context, IConfiguration configuration)
+        public PaymentController(IPaymentService vnPayService, ApplicationDbContext context)
         {
+		
+            _vnPayService = vnPayService;
             _context = context;
-            _configuration = configuration;
+        }
+
+        public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
+        {
+            var url = _vnPayService.CreatePaymentUrl(model, HttpContext);
+
+            return  Ok(new { paymentUrl = url });
         }
         
-        [Authorize]
-        [HttpPost("create")]
-        public IActionResult CreatePayment([FromBody] PaymentRequest request)
+        [HttpGet("confirm")]
+        public async Task<IActionResult> ConfirmPayment()
         {
-            try
+            string userId = Request.Query["userId"];
+            string amount = Request.Query["vnp_Amount"];
+            string bankCode = Request.Query["vnp_BankCode"];
+            string bankTranNo = Request.Query["vnp_BankTranNo"];
+            string cardType = Request.Query["vnp_CardType"];
+            string orderInfo = Request.Query["vnp_OrderInfo"];
+            string payDate = Request.Query["vnp_PayDate"];
+            string responseCode = Request.Query["vnp_ResponseCode"];
+            string transactionNo = Request.Query["vnp_TransactionNo"];
+            string transactionStatus = Request.Query["vnp_TransactionStatus"];
+            string txnRef = Request.Query["vnp_TxnRef"];
+            int typeStorageId = int.Parse(Request.Query["typeStorageId"]);
+            var typeStorage = await _context.TypeStorages.FindAsync(typeStorageId);
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(payDate))
             {
-                var userId = GetUserIdFromToken();
-                if (userId == null)
-                {
-                    return Unauthorized(new { message = "Không thể xác định UserId từ token" });
-                }
-
-                var vnp_TmnCode = _configuration["VnPay:TmnCode"];
-                var vnp_HashSecret = _configuration["VnPay:HashSecret"];
-                var vnp_Url = _configuration["VnPay:Url"];
-                var vnp_ReturnUrl = _configuration["VnPay:ReturnUrl"];
-
-                var orderId = DateTime.UtcNow.Ticks.ToString(); 
-                var vnpay = new VnPayLibrary();
-
-                vnpay.AddRequestData("vnp_Version", "2.1.0");
-                vnpay.AddRequestData("vnp_Command", "pay");
-                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-                vnpay.AddRequestData("vnp_Amount", (request.Amount * 100).ToString()); 
-                vnpay.AddRequestData("vnp_CurrCode", "VND");
-                vnpay.AddRequestData("vnp_TxnRef", orderId);
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng " + orderId);
-                vnpay.AddRequestData("vnp_OrderType", "billpayment");
-                vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_ReturnUrl", vnp_ReturnUrl);
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
-                vnpay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString());
-
-                string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-               
-                return Ok(new
-                {
-                    paymentUrl,
-                    orderId,
-                    typeStorageId = request.TypeStorageId 
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Lỗi tạo thanh toán", error = ex.Message });
-            }
-        }
-
-        [HttpGet("callback")]
-        public IActionResult PaymentCallback()
-        {
-            var vnp_HashSecret = _configuration["VnPay:HashSecret"];
-            var vnpay = new VnPayLibrary();
-
-            var vnp_ResponseCode = Request.Query["vnp_ResponseCode"];
-            var vnp_TxnRef = Request.Query["vnp_TxnRef"];
-            var vnp_Amount = Request.Query["vnp_Amount"];
-            var vnp_SecureHash = Request.Query["vnp_SecureHash"];
-
-            if (!vnpay.ValidateSignature(Request.Query, vnp_HashSecret))
-            {
-                return BadRequest(new { message = "Invalid signature" });
+                return BadRequest("Lỗi: Dữ liệu không hợp lệ.");
             }
 
-            if (vnp_ResponseCode == "00") 
+            if (!DateTime.TryParseExact(payDate, "yyyyMMddHHmmss", null, System.Globalization.DateTimeStyles.None, out DateTime dateTimeStart))
             {
-                var userId = GetUserIdFromToken();
-                if (userId == null)
-                {
-                    return Unauthorized(new { message = "Không thể xác định UserId từ token" });
-                }
+                return BadRequest("Lỗi: Định dạng ngày tháng không hợp lệ.");
+            }
+            DateTime dateTimeEnd = dateTimeStart.AddMonths(1);
 
-                var typeStorageId = int.TryParse(Request.Query["TypeStorageId"], out int tsId) ? tsId : 1;
-
-                var payment = new PaymentModel
+            if (responseCode == "00" && transactionStatus == "00")
+            {
+                var payment = new ManagerStorageModel()
                 {
+                    UserId = int.Parse(userId),
                     TypeStorageId = typeStorageId,
-                    UserId = (int)userId,
-                    Price = decimal.Parse(vnp_Amount) / 100,
-                    PaymentDate = DateTime.UtcNow
+                    DateTimeStart = dateTimeStart,
+                    DateTimeEnd = dateTimeEnd
                 };
 
-                _context.Payments.Add(payment);
-                _context.SaveChanges();
-
-                return Ok(new { message = "Thanh toán thành công!", orderId = vnp_TxnRef });
+                _context.ManagerStorages.Add(payment);
+                await _context.SaveChangesAsync();
+                bool isSuccess = (responseCode == "00" && transactionStatus == "00");
+                ViewBag.IsSuccess = isSuccess;
+                ViewBag.TypeStorageName = typeStorage?.Name;
+                ViewBag.Amount = amount;
+                ViewBag.BankCode = bankCode;
+                ViewBag.BankTranNo = bankTranNo;
+                ViewBag.CardType = cardType;
+                ViewBag.OrderInfo = orderInfo;
+                ViewBag.PayDate = payDate;
+                ViewBag.TransactionNo = transactionNo;
+                ViewBag.TxnRef = txnRef;
+                return View("PaymentResult");
             }
-
-            return BadRequest(new { message = "Thanh toán thất bại!", responseCode = vnp_ResponseCode });
+            else
+            {
+                ViewBag.Message = "Thanh toán thất bại. Vui lòng thử lại.";
+                ViewBag.IsSuccess = false;
+                return View("PaymentResult");
+            }
         }
     }
 }

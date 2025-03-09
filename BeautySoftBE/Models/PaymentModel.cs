@@ -7,7 +7,7 @@ namespace BeautySoftBE.Models
         public int UserId { get; set; }
         public decimal Price { get; set; }
         public DateTime PaymentDate { get; set; }
-        public TypeStorageModel TypeStorage { get; set; }
-        public UserModel User { get; set; }
+        public TypeStorageModel? TypeStorage { get; set; }
+        public UserModel? User { get; set; }
     }
 }

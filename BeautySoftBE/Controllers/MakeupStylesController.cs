@@ -4,7 +4,9 @@ using BeautySoftBE.Services;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security.Claims;
+using BeautySoftBE.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeautySoftBE.Controllers
 {
@@ -13,10 +15,12 @@ namespace BeautySoftBE.Controllers
     public class MakeupStylesController : BaseController 
     {
         private readonly IMakeupStyleService _makeupStyleService;
+        private readonly ApplicationDbContext _context;
 
-        public MakeupStylesController(IMakeupStyleService makeupStyleService)
+        public MakeupStylesController(IMakeupStyleService makeupStyleService, ApplicationDbContext context)
         {
             _makeupStyleService = makeupStyleService;
+            _context = context;
         }
         
         [HttpGet]
@@ -40,12 +44,28 @@ namespace BeautySoftBE.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle(MakeupStyleModel makeupStyle, IFormFile imageFile)
+        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle(MakeupStyleModel makeupStyle)
         {
-            await _makeupStyleService.CreateAsync(makeupStyle, imageFile);
+             var userId = GetUserIdFromToken();
+             if(userId != null){ makeupStyle.UserId = userId.Value;}
+            
+            bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
+
+            if (!userHasStorage)
+            {
+                int itemCount = await _context.MakeupStyles.CountAsync(m => m.UserId == userId);
+        
+                if (itemCount >= 20)
+                {
+                    return BadRequest("Storage limit reached, maximum 20 products can be stored.");
+                }
+            }
+
+            await _makeupStyleService.CreateAsync(makeupStyle);
             return CreatedAtAction(nameof(GetMakeupStyle), new { id = makeupStyle.Id }, makeupStyle);
         }
-        
+
+        /*
         [HttpPut("update")]
         public async Task<IActionResult> PutMakeupStyle([FromBody] MakeupStyleModel makeupStyle, IFormFile imageFile)
         {
@@ -64,6 +84,7 @@ namespace BeautySoftBE.Controllers
             await _makeupStyleService.UpdateAsync(makeupStyle, imageFile);
             return NoContent();
         }
+        */
         
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupStyle(int id)

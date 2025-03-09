@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+    Layout = null; // Bỏ layout mặc định
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết quả thanh toán</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        .btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.42857143;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #fff;
+            background-color: #337ab7;
+            border-color: #2e6da4;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Kết quả thanh toán</h2>
+
+    @if (ViewBag.IsSuccess)
+    {
+        <div class="alert alert-success">
+            <h4>Thanh toán thành công!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <h4>Thanh toán thất bại. Vui lòng thử lại.</h4>
+        </div>
+    }
+
+    <h3>Thông tin giao dịch:</h3>
+    <table class="table">
+        <tr>
+            <th>Loại dịch vụ</th>
+            <td>@ViewBag.TypeStorageName</td>
+        </tr>
+        <tr>
+            <th>Số tiền</th>
+            <td>@ViewBag.Amount</td>
+        </tr>
+        <tr>
+            <th>Mã ngân hàng</th>
+            <td>@ViewBag.BankCode</td>
+        </tr>
+        <tr>
+            <th>Mã giao dịch ngân hàng</th>
+            <td>@ViewBag.BankTranNo</td>
+        </tr>
+        <tr>
+            <th>Loại thẻ</th>
+            <td>@ViewBag.CardType</td>
+        </tr>
+        <tr>
+            <th>Thông tin đơn hàng</th>
+            <td>@ViewBag.OrderInfo</td>
+        </tr>
+        <tr>
+            <th>Ngày thanh toán</th>
+            <td>@ViewBag.PayDate</td>
+        </tr>
+        <tr>
+            <th>Mã giao dịch VNPay</th>
+            <td>@ViewBag.TransactionNo</td>
+        </tr>
+        <tr>
+            <th>Mã tham chiếu</th>
+            <td>@ViewBag.TxnRef</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

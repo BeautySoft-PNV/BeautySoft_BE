@@ -65,6 +65,21 @@ namespace BeautySoftBE.Controllers
         {
             try
             {
+                var userId = GetUserIdFromToken();
+                if(userId != null){    makeupItem.UserId = userId.Value;}
+                
+                bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
+
+                if (!userHasStorage)
+                {
+                    int itemCount = await _context.MakeupItems.CountAsync(m => m.UserId == userId);
+            
+                    if (itemCount >= 20)
+                    {
+                        return BadRequest("Storage limit reached, maximum 20 products can be stored.");
+                    }
+                }
+
                 var createdItem = await _makeupItemService.CreateAsync(makeupItem, imageFile);
                 return Ok(createdItem);
             }
@@ -73,7 +88,6 @@ namespace BeautySoftBE.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
         [HttpPut]
         public async Task<IActionResult> PutMakeupItem(MakeupItemModel makeupItemDto, IFormFile imageFile)
         {

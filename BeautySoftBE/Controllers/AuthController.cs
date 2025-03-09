@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterDTO model)
     {
         var result = await _authService.RegisterAsync(model);
-        if (result == "Tài khoản đã tồn tại!")
+        if (result == "Account already exists!")
             return BadRequest(new { message = result });
 
         return Ok(new { message = result });
@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
     {
         var token = await _authService.LoginAsync(model);
         if (token == null)
-            return Unauthorized(new { message = "Sai tài khoản hoặc mật khẩu!" });
+            return Unauthorized(new { message = "Wrong account or password!" });
 
         return Ok(new { token });
     }
@@ -38,6 +38,6 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        return Ok(new { message = "Đăng xuất thành công!" });
+        return Ok(new { message = "Log out successfully!" });
     }
 }

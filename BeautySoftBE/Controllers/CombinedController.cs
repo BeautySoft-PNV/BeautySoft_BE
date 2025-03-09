@@ -12,9 +12,9 @@ public class CombinedController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
-    private const string CohereApiKey = "c16bERXascAbVHtGBbsuT0pKgVyA7CVnpst4paXM";
+    private const string CohereApiKey = "8HhUWx3frdHu29voJfwMKVXt0ctrJb6AVPwCynfu";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-y8IoHAx7jW2QyPVDUWvV2UVEAox3JjpgfJ01lZQ31KYtOinE";
+    private const string StabilityApiKey = "sk-LZsHfitLOY7Gm4cb78x5rHqP1frrtxl56DusgENgmToxCPpn";
 
     public CombinedController(IHttpClientFactory httpClientFactory)
     {
@@ -29,7 +29,7 @@ public class CombinedController : ControllerBase
 
         var cohereRequestData = new
         {
-            model = "command-xlarge-nightly",
+            model = "command-xlarge",
             prompt = request.TextPrompt,
             max_tokens = 500,
             temperature = 0.8,
@@ -54,6 +54,7 @@ public class CombinedController : ControllerBase
         {
              text = doc.RootElement.GetProperty("text").GetString();
         }
+        
         string translatedText = await TranslateText(text, "vi", "en");
         var generatedPrompt = translatedText;
 
@@ -85,6 +86,7 @@ public class CombinedController : ControllerBase
             }
 
             var promptContent = new StringContent(generatedPrompt);
+            
             promptContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
             {
                 Name = "\"prompt\""

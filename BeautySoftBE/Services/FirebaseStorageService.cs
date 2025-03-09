@@ -11,13 +11,13 @@ public class FirebaseStorageService
 
     public FirebaseStorageService(IConfiguration configuration)
     {
-        _bucketName = configuration["Firebase:StorageBucket"];
+        _bucketName = "sinh-826e6.appspot.com";
         
         if (FirebaseApp.DefaultInstance == null)
         {
             FirebaseApp.Create(new AppOptions
             {
-                Credential = GoogleCredential.FromFile("firebase_credentials/beauty-soft-e3ace-firebase-adminsdk-fbsvc-a0b2127288.json")
+                Credential = GoogleCredential.FromFile(@"C:\Users\Sinh\source\repos\BeautySoft_BE\BeautySoftBE\firebase_credentials\sinh-826e6-firebase-adminsdk-eok09-86d202a8f4.json")
             });
         }
         
