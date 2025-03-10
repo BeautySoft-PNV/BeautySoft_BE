@@ -18,16 +18,14 @@ namespace BeautySoftBE.Controllers;
 [Route("api/account")]
 public class AccountController : Controller
 {
-    private readonly UserManager<UserModel> _userManager;
     private readonly EmailService _emailSender;
     private readonly ApplicationDbContext _context;
     private readonly IUserRepository _userRepository;
     private readonly JWTService _jwtService;
     private readonly IConfiguration _configuration;
 
-    public AccountController(UserManager<UserModel> userManager, EmailService emailSender, ApplicationDbContext context,  IUserRepository userRepository, JWTService jwtService, IConfiguration configuration)
+    public AccountController( EmailService emailSender, ApplicationDbContext context,  IUserRepository userRepository, JWTService jwtService, IConfiguration configuration)
     {
-        _userManager = userManager;
         _emailSender = emailSender;
         _context = context;
         _userRepository = userRepository;
@@ -49,14 +47,14 @@ public class AccountController : Controller
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
         if (user == null)
-            return NotFound(new { message = "Email không tồn tại!" });
+            return NotFound(new { message = "Email does not exist!" });
 
         var token = GenerateJwtToken(user);
         var resetLink = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
 
-        await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Click vào <a href='{resetLink}'>đây</a> để đặt lại mật khẩu.");
+        await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Click on <a href='{resetLink}'>đây</a> to reset password.");
 
-        return Ok(new { message = "Email đặt lại mật khẩu đã được gửi!" });
+        return Ok(new { message = "Password reset email has been sent!" });
     }
     
     [HttpPost("reset-password")]
@@ -67,29 +65,29 @@ public class AccountController : Controller
         var principal = _jwtService.ValidateToken(token);
         if (principal == null)
         {
-            return Unauthorized(new { message = "Token không hợp lệ hoặc đã hết hạn!" });
+            return Unauthorized(new { message = "Token is invalid or expired!" });
         }
         
         if (!ModelState.IsValid)
         {
-            return BadRequest(new { message = "Dữ liệu không hợp lệ!", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+            return BadRequest(new { message = "Invalid data!", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
         }
 
         var user = await _userRepository.GetEmailByUsernameAsync(model.Email);
         if (user == null)
         {
-            return BadRequest(new { message = "Email không hợp lệ!" });
+            return BadRequest(new { message = "Invalid email!" });
         }
 
         if (string.IsNullOrWhiteSpace(model.NewPassword) || model.NewPassword.Length < 6)
         {
-            return BadRequest(new { message = "Mật khẩu phải có ít nhất 6 ký tự!" });
+            return BadRequest(new { message = "Password must be at least 6 characters!" });
         }
 
         user.Password = HashPassword(model.NewPassword);
         await _userRepository.UpdateAsync(user);
 
-        return Ok(new { message = "Mật khẩu đã được đặt lại thành công!" });
+        return Ok(new { message = "Password reset successfully!" });
     }
 
     
@@ -120,7 +118,7 @@ public class AccountController : Controller
                 new Claim(ClaimTypes.Email, user.Email ?? "Unknown"), 
                 new Claim(ClaimTypes.Role, role)
             }),
-            Expires = DateTime.UtcNow.AddHours(2),
+            Expires = DateTime.UtcNow.AddSeconds(60),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 

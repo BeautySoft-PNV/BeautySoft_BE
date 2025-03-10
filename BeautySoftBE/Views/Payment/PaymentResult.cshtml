@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kết quả thanh toán</title>
+    <title>Payment results</title>
     <style>
         .container {
             max-width: 800px;
@@ -65,22 +65,22 @@
 </head>
 <body>
 <div class="container">
-    <h2>Kết quả thanh toán</h2>
+    <h2>Payment results</h2>
 
     @if (ViewBag.IsSuccess)
     {
         <div class="alert alert-success">
-            <h4>Thanh toán thành công!</h4>
+            <h4>Payment successful!</h4>
         </div>
     }
     else
     {
         <div class="alert alert-danger">
-            <h4>Thanh toán thất bại. Vui lòng thử lại.</h4>
+            <h4>Payment failed. Please try again.</h4>
         </div>
     }
 
-    <h3>Thông tin giao dịch:</h3>
+    <h3>Transaction information:</h3>
     <table class="table">
         <tr>
             <th>Loại dịch vụ</th>
