@@ -21,7 +21,14 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupItemStyleModel>>> GetMyMakeupItemStyles()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token." });

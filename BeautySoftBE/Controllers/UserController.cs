@@ -1,4 +1,5 @@
-﻿using BeautySoftBE.Models;
+﻿using System.IdentityModel.Tokens.Jwt;
+using BeautySoftBE.Models;
 using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,6 @@ namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsersController : BaseController
     {
         private readonly IUserService _userService;
@@ -30,7 +30,14 @@ namespace BeautySoftBE.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserModel>> GetUserFromToken()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null) return Unauthorized("Token không hợp lệ.");
 
             var user = await _userService.GetByIdAsync(userId.Value);
@@ -48,7 +55,14 @@ namespace BeautySoftBE.Controllers
             {
                 return BadRequest("User data is missing.");
             }
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null) return Unauthorized("Token không hợp lệ.");
             var userModel = await _userRepository.GetEmailByUsernameAsync(user.Email);
             if (user.Password != null)
@@ -76,7 +90,14 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("me")]
         public async Task<IActionResult> DeleteUser()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null) return Unauthorized("Token không hợp lệ.");
 
             var result = await _userService.DeleteAsync(userId.Value);
@@ -89,7 +110,7 @@ namespace BeautySoftBE.Controllers
         {
             return HashPassword(password) == passwordHash;
         }
-        
+
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())

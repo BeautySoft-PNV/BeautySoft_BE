@@ -41,5 +41,13 @@ namespace BeautySoftBE.Models
         {
             return ExpirationDate > DateOfManufacture;
         }
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (ExpirationDate <= DateOfManufacture)
+            {
+                yield return new ValidationResult("Expiration date must be after manufacture date.", new[] { nameof(ExpirationDate) });
+            }
+        }
     }
+    
 }

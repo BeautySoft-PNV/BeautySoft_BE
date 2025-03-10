@@ -2,6 +2,7 @@
 using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BeautySoftBE.Data;
@@ -23,7 +24,6 @@ namespace BeautySoftBE.Controllers
             _context = context;
         }
         
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MakeupItemModel>>> GetMakeupItems()
         {
@@ -45,7 +45,14 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupItemModel>>> GetMyMakeupItems()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token" });
@@ -61,11 +68,18 @@ namespace BeautySoftBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
+        public async Task<IActionResult> CreateAsync([FromForm] MakeupItemModel makeupItem, [FromForm] IFormFile imageFile)
         {
             try
             {
-                var userId = GetUserIdFromToken();
+                var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+                if (token.StartsWith("Bearer "))
+                {
+                    token = token.Substring(7).Trim();
+                }
+
+                var userId = GetUserIdFromToken(token);
                 if(userId != null){    makeupItem.UserId = userId.Value;}
                 
                 bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
@@ -88,6 +102,7 @@ namespace BeautySoftBE.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        
         [HttpPut]
         public async Task<IActionResult> PutMakeupItem(MakeupItemModel makeupItemDto, IFormFile imageFile)
         {
@@ -96,7 +111,14 @@ namespace BeautySoftBE.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token" });
@@ -119,7 +141,14 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupItem(int id)
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token" });
@@ -150,6 +179,23 @@ namespace BeautySoftBE.Controllers
             }
 
             return Ok(items);
+        }
+        
+        public int? GetUserIdFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            
+            if (!handler.CanReadToken(token))
+            {
+                Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+                return null;
+            }
+
+            var jsonToken = handler.ReadJwtToken(token);
+
+            var userIdClaim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
+    
+            return userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
         }
     }
 }

@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BeautySoftBE.Models;
 using BeautySoftBE.Services;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using BeautySoftBE.Data;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace BeautySoftBE.Controllers
@@ -44,10 +41,17 @@ namespace BeautySoftBE.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle(MakeupStyleModel makeupStyle)
+        public async Task<ActionResult<MakeupStyleModel>> PostMakeupStyle([FromForm] MakeupStyleModel makeup,[FromForm] IFormFile imageFile)
         {
-             var userId = GetUserIdFromToken();
-             if(userId != null){ makeupStyle.UserId = userId.Value;}
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
+             if(userId != null){ makeup.UserId = userId.Value;}
             
             bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
 
@@ -61,8 +65,8 @@ namespace BeautySoftBE.Controllers
                 }
             }
 
-            await _makeupStyleService.CreateAsync(makeupStyle);
-            return CreatedAtAction(nameof(GetMakeupStyle), new { id = makeupStyle.Id }, makeupStyle);
+            await _makeupStyleService.CreateAsync(makeup, imageFile);
+            return CreatedAtAction(nameof(GetMakeupStyle), new { id = makeup.Id }, makeup);
         }
 
         /*
@@ -89,7 +93,14 @@ namespace BeautySoftBE.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMakeupStyle(int id)
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token." });
@@ -114,7 +125,14 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupStyleModel>>> GetMyMakeupStyles()
         {
-            var userId = GetUserIdFromToken(); 
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
                 return Unauthorized(new { message = "Không thể xác định UserId từ token" });
@@ -127,5 +145,23 @@ namespace BeautySoftBE.Controllers
             }
             return Ok(makeupStyles);
         }
+        
+        public int? GetUserIdFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            
+            if (!handler.CanReadToken(token))
+            {
+                Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+                return null;
+            }
+
+            var jsonToken = handler.ReadJwtToken(token);
+
+            var userIdClaim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
+    
+            return userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
+        }
+
     }
 }

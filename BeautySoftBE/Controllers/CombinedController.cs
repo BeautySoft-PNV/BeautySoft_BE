@@ -12,9 +12,9 @@ public class CombinedController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
-    private const string CohereApiKey = "8HhUWx3frdHu29voJfwMKVXt0ctrJb6AVPwCynfu";
+    private const string CohereApiKey = "k1gbkCVHtgXASIb1Xl0Z9ojo9EArSfW8OrO10YeV";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-LZsHfitLOY7Gm4cb78x5rHqP1frrtxl56DusgENgmToxCPpn";
+    private const string StabilityApiKey = "sk-egaVcVd97i1mEDg7iSnp4oRDbuB1CidWmKEu3IF8J2QYs6HK";
 
     public CombinedController(IHttpClientFactory httpClientFactory)
     {

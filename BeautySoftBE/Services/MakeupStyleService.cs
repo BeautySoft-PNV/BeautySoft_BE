@@ -24,14 +24,14 @@ public class MakeupStyleService : IMakeupStyleService
         return await _context.MakeupStyles.FindAsync(id);
     }
 
-    public async Task CreateAsync(MakeupStyleModel makeupStyle)
+    public async Task CreateAsync(MakeupStyleModel makeupStyle, IFormFile imageFile)
     {
         if (makeupStyle == null)
         {
             throw new ArgumentNullException(nameof(makeupStyle), "Dữ liệu không hợp lệ.");
         }
         
-        /*if (imageFile != null && imageFile.Length > 0)
+        if (imageFile != null && imageFile.Length > 0)
         {
             try
             {
@@ -55,7 +55,7 @@ public class MakeupStyleService : IMakeupStyleService
             {
                 throw new Exception("Lỗi khi lưu ảnh vào server", ex);
             }
-        }*/
+        }
 
         await _context.MakeupStyles.AddAsync(makeupStyle);
         await _context.SaveChangesAsync();

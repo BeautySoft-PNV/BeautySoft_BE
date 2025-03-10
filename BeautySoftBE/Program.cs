@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using BeautySoftBE.Data;
 using BeautySoftBE.Models;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -48,10 +50,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero, 
+            NameClaimType = ClaimTypes.NameIdentifier 
         };
     });
-
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // Giới hạn 10MB
+});
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMakeupItemService, MakeupItemService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -93,8 +100,8 @@ else
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); 
+app.UseAuthorization(); 
 
 
 // Xử lý các yêu cầu OPTIONS mà không cần xác thực

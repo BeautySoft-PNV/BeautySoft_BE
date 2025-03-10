@@ -1,20 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 [ApiController]
 public class BaseController : ControllerBase
 {
-    protected int? GetUserIdFromToken()
+    protected int? GetUserIdFromToken(string token)
     {
-        var identity = HttpContext.User.Identity as ClaimsIdentity;
-        if (identity != null)
+        var handler = new JwtSecurityTokenHandler();
+            
+        if (!handler.CanReadToken(token))
         {
-            var userIdClaim = identity.FindFirst("id");
-            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return userId;
-            }
+            Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+            return null;
         }
-        return null;
+
+        var jsonToken = handler.ReadJwtToken(token);
+
+        var userIdClaim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value;
+    
+        return userIdClaim != null ? int.Parse(userIdClaim) : (int?)null;
     }
+
 }

@@ -9,7 +9,6 @@ namespace BeautySoftBE.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ManagerStorageController : BaseController
     {
         private readonly ApplicationDbContext _context;
@@ -22,7 +21,14 @@ namespace BeautySoftBE.Controllers
         [HttpGet("check-user")]
         public IActionResult CheckUserStorage()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
 
             bool exists = _context.ManagerStorages.Any(ms => ms.UserId == userId);
 
