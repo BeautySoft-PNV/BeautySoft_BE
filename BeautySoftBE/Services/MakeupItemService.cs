@@ -29,51 +29,50 @@ namespace BeautySoftBE.Services
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
-        {
-            if (makeupItem == null)
+            public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
             {
-                throw new ArgumentNullException(nameof(makeupItem), "Dữ liệu không hợp lệ.");
-            }
-
-            var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
-            if (!userExists)
-            {
-                throw new Exception("UserId does not exist in the system.");
-            }
-
-            // Lưu ảnh vào thư mục trong source
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                try
+                if (makeupItem == null)
                 {
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
-                    string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(fileStream);
-                    }
-
-                    // Lưu đường dẫn ảnh vào database
-                    makeupItem.Image = $"/uploads/{uniqueFileName}";
+                    throw new ArgumentNullException(nameof(makeupItem), "Dữ liệu không hợp lệ.");
                 }
-                catch (Exception ex)
+
+                var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
+                if (!userExists)
                 {
-                    throw new Exception("Error saving image to server", ex);
+                    throw new Exception("UserId does not exist in the system.");
                 }
-            }
 
-            _context.MakeupItems.Add(makeupItem);
-            await _context.SaveChangesAsync();
-            return makeupItem;
-        }
+                // Lưu ảnh vào thư mục trong source
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    try
+                    {
+                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(fileStream);
+                        }
+                        
+                        makeupItem.Image = $"/uploads/{uniqueFileName}";
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Error saving image to server", ex);
+                    }
+                }
+
+                _context.MakeupItems.Add(makeupItem);
+                await _context.SaveChangesAsync();
+                return makeupItem;
+            }
 
         public async Task<bool> UpdateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
         {
