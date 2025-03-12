@@ -1,9 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BeautySoftBE.Services;
 using Microsoft.IdentityModel.Tokens;
 
-public class JWTService
+public class JWTService : IJWTService
 {
     private readonly IConfiguration _config;
 

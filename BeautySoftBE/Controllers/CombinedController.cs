@@ -14,7 +14,7 @@ public class CombinedController : ControllerBase
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
     private const string CohereApiKey = "k1gbkCVHtgXASIb1Xl0Z9ojo9EArSfW8OrO10YeV";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-egaVcVd97i1mEDg7iSnp4oRDbuB1CidWmKEu3IF8J2QYs6HK";
+    private const string StabilityApiKey = "sk-MqjP55RO2PtGLdSaBLSb2kCZgkteEiUpJF2SjK8u94iJq5j5";
 
     public CombinedController(IHttpClientFactory httpClientFactory)
     {
