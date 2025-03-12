@@ -64,6 +64,16 @@ namespace BeautySoftBE.Controllers
 
                 _context.ManagerStorages.Add(payment);
                 await _context.SaveChangesAsync();
+                
+                var notification = new NotificationHistoryModel()
+                {
+                    UserId = int.Parse(userId),
+                    NotificationId = 3,
+                    Title = "Payment"
+                };
+
+                _context.NotificationHistories.Add(notification);
+                await _context.SaveChangesAsync();
                 bool isSuccess = (responseCode == "00" && transactionStatus == "00");
                 ViewBag.IsSuccess = isSuccess;
                 ViewBag.TypeStorageName = typeStorage?.Name;

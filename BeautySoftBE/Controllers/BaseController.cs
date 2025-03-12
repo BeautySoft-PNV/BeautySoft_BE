@@ -11,7 +11,7 @@ public class BaseController : ControllerBase
             
         if (!handler.CanReadToken(token))
         {
-            Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+            Console.WriteLine("Token is invalid or corrupted.");
             return null;
         }
 

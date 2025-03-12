@@ -121,12 +121,12 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
+                return Unauthorized(new { message = "Unable to determine UserId from token" });
             }
 
             if (userId.Value != makeupItemDto.UserId)
             {
-                return Forbid("Bạn chỉ có thể cập nhật sản phẩm của chính mình.");
+                return Forbid("You can only update your own products.");
             }
 
             var result = await _makeupItemService.UpdateAsync(makeupItemDto, imageFile);
@@ -151,19 +151,19 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
+                return Unauthorized(new { message = "Unable to determine UserId from token" });
             }
 
             var makeupItem = await _makeupItemService.GetByIdAsync(id);
             if (makeupItem == null || makeupItem.UserId != userId)
             {
-                return NotFound("Không tìm thấy sản phẩm hoặc sản phẩm này không thuộc về bạn.");
+                return NotFound("Product not found or this product does not belong to you.");
             }
             
             var result = await _makeupItemService.DeleteAsync(id);
             if (!result)
             {
-                return BadRequest("Không thể xóa sản phẩm.");
+                return BadRequest("Cannot delete product.");
             }
 
             return NoContent();
@@ -175,7 +175,7 @@ namespace BeautySoftBE.Controllers
             var items = await _makeupItemService.SearchByNameAsync(name);
             if (items == null || !items.Any())
             {
-                return NotFound("Không tìm thấy sản phẩm phù hợp.");
+                return NotFound("No matching products found.");
             }
 
             return Ok(items);
@@ -187,7 +187,7 @@ namespace BeautySoftBE.Controllers
             
             if (!handler.CanReadToken(token))
             {
-                Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+                Console.WriteLine("Token is invalid or corrupted.");
                 return null;
             }
 

@@ -26,7 +26,7 @@ public class AuthService : IAuthService
     {
         if (await _userRepository.UserExistsAsync(model.Username))
         {
-            return "Tài khoản đã tồn tại!";
+            return"Account already exists!";
         }
         var user = new UserModel
         {
@@ -37,7 +37,7 @@ public class AuthService : IAuthService
         };
 
         await _userRepository.AddUserAsync(user);
-        return "Đăng ký thành công!";
+        return"Registration successful!";
     }
 
     public async Task<string?> LoginAsync(LoginDTO model)

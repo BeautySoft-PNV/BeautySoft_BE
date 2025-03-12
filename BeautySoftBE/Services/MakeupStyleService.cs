@@ -28,7 +28,7 @@ public class MakeupStyleService : IMakeupStyleService
     {
         if (makeupStyle == null)
         {
-            throw new ArgumentNullException(nameof(makeupStyle), "Dữ liệu không hợp lệ.");
+            throw new ArgumentNullException(nameof(makeupStyle),"Invalid data.");
         }
         
         if (imageFile != null && imageFile.Length > 0)
@@ -53,7 +53,7 @@ public class MakeupStyleService : IMakeupStyleService
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi khi lưu ảnh vào server", ex);
+                throw new Exception("Error saving image to server", ex);
             }
         }
 

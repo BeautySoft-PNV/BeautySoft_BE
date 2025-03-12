@@ -38,10 +38,10 @@ namespace BeautySoftBE.Controllers
             }
 
             var userId = GetUserIdFromToken(token);
-            if (userId == null) return Unauthorized("Token không hợp lệ.");
+            if (userId == null) return Unauthorized("Invalid token.");
 
             var user = await _userService.GetByIdAsync(userId.Value);
-            if (user == null) return NotFound("Không tìm thấy thông tin người dùng.");
+            if (user == null) return NotFound("User information not found.");
 
             return Ok(user);
         }
@@ -63,7 +63,7 @@ namespace BeautySoftBE.Controllers
             }
 
             var userId = GetUserIdFromToken(token);
-            if (userId == null) return Unauthorized("Token không hợp lệ.");
+            if (userId == null) return Unauthorized("Invalid token.");
             var userModel = await _userRepository.GetEmailByUsernameAsync(user.Email);
             if (user.Password != null)
             {
@@ -98,10 +98,10 @@ namespace BeautySoftBE.Controllers
             }
 
             var userId = GetUserIdFromToken(token);
-            if (userId == null) return Unauthorized("Token không hợp lệ.");
+            if (userId == null) return Unauthorized("Invalid Token.");
 
             var result = await _userService.DeleteAsync(userId.Value);
-            if (!result) return NotFound("Không tìm thấy người dùng để xóa.");
+            if (!result) return NotFound("No user found to delete.");
 
             return NoContent();
         }

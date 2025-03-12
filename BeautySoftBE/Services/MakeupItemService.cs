@@ -39,7 +39,7 @@ namespace BeautySoftBE.Services
             var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
             if (!userExists)
             {
-                throw new Exception("UserId không tồn tại trong hệ thống.");
+                throw new Exception("UserId does not exist in the system.");
             }
 
             // Lưu ảnh vào thư mục trong source
@@ -66,7 +66,7 @@ namespace BeautySoftBE.Services
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Lỗi khi lưu ảnh vào server", ex);
+                    throw new Exception("Error saving image to server", ex);
                 }
             }
 
@@ -80,7 +80,7 @@ namespace BeautySoftBE.Services
             var existingItem = await _context.MakeupItems.FindAsync(makeupItem.Id);
             if (existingItem == null)
             {
-                throw new KeyNotFoundException("Không tìm thấy sản phẩm trang điểm.");
+                throw new KeyNotFoundException("No makeup products found.");
             }
 
             existingItem.Name = makeupItem.Name;
@@ -104,8 +104,7 @@ namespace BeautySoftBE.Services
                     {
                         await imageFile.CopyToAsync(fileStream);
                     }
-
-                    // Xóa ảnh cũ (nếu có)
+                    
                     if (!string.IsNullOrEmpty(existingItem.Image))
                     {
                         string oldFilePath = Path.Combine(uploadsFolder, Path.GetFileName(existingItem.Image));
@@ -114,13 +113,11 @@ namespace BeautySoftBE.Services
                             File.Delete(oldFilePath);
                         }
                     }
-
-                    // Cập nhật đường dẫn ảnh mới
                     existingItem.Image = $"/uploads/{uniqueFileName}";
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Lỗi khi cập nhật ảnh trên server", ex);
+                    throw new Exception("Error updating image on server", ex);
                 }
             }
 

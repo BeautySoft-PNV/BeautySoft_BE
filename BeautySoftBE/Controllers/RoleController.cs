@@ -46,7 +46,7 @@ namespace BeautySoftBE.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] RoleModel role)
         {
             if (id != role.Id)
-                return BadRequest("ID không khớp.");
+                return BadRequest("ID does not match.");
 
             var updated = await _roleService.UpdateAsync(role);
             if (!updated)

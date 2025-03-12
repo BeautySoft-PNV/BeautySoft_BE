@@ -103,18 +103,18 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token." });
+                return Unauthorized(new { message = "Unable to determine UserId from token." });
             }
             
             var makeupStyle = await _makeupStyleService.GetByIdAsync(id);
             if (makeupStyle == null)
             {
-                return NotFound("Không tìm thấy phong cách trang điểm.");
+                return NotFound("No makeup style found.");
             }
             
             if (makeupStyle.UserId != userId)
             {
-                return Forbid("Phong cách này không thuộc về bạn.");
+                return Forbid("This style does not belong to you.");
             }
             
             await _makeupStyleService.DeleteAsync(id);
@@ -135,13 +135,13 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
+                return Unauthorized(new { message = "Unable to determine UserId from token" });
             }
 
             var makeupStyles = await _makeupStyleService.GetByUserIdAsync(userId.Value);
             if (makeupStyles == null || !makeupStyles.Any())
             {
-                return NotFound(new { message = "Không tìm thấy phong cách trang điểm nào" });
+                return NotFound(new { message = "No makeup styles found" });
             }
             return Ok(makeupStyles);
         }
@@ -152,7 +152,7 @@ namespace BeautySoftBE.Controllers
             
             if (!handler.CanReadToken(token))
             {
-                Console.WriteLine("Token không hợp lệ hoặc bị hỏng.");
+                Console.WriteLine("Token is invalid or corrupted.");
                 return null;
             }
 
