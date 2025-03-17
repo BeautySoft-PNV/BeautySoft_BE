@@ -103,7 +103,7 @@ namespace BeautySoftBE.Controllers
             }
         }
         
-        [HttpPut("{userId}")]
+        [HttpPut("{MakeupItemId}")]
         public async Task<IActionResult> PutMakeupItem(string id, MakeupItemModel makeupItemDto, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
