@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BeautySoftBE.Models
 {
-    public class UserModel : IdentityUser
+    public class UserModel
     {
         public int Id { get; set; }
         
@@ -17,12 +17,13 @@ namespace BeautySoftBE.Models
         [CustomPasswordValidation]
         public string Password { get; set; }
 
-        [Url(ErrorMessage = "Định dạng URL Avatar không hợp lệ.")]
+        [Url(ErrorMessage = "Invalid Avatar URL format.")]
         public string? Avatar { get; set; }
 
-        [Required(ErrorMessage = "RoleId không được bỏ trống.")]
+        [Required(ErrorMessage = "RoleId cannot be empty.")]
         public int RoleId { get; set; }
         public RoleModel? Role { get; set; }
+        public bool IsBlocked { get; set; } = false;
     }
     public class CustomNameValidation : ValidationAttribute
     {
@@ -31,11 +32,11 @@ namespace BeautySoftBE.Models
             var name = value as string;
             if (string.IsNullOrEmpty(name))
             {
-                return new ValidationResult("Tên không được bỏ trống.");
+                return new ValidationResult("Name cannot be left blank.");
             }
             if (name.Length > 100)
             {
-                return new ValidationResult("Tên không được vượt quá 100 ký tự.");
+                return new ValidationResult("Name cannot exceed 100 characters.");
             }
             return ValidationResult.Success;
         }
@@ -47,17 +48,17 @@ namespace BeautySoftBE.Models
             var email = value as string;
             if (string.IsNullOrEmpty(email))
             {
-                return new ValidationResult("Email không được bỏ trống.");
+                return new ValidationResult("Email cannot be left blank.");
             }
             if (email.Length > 150)
             {
-                return new ValidationResult("Email không được vượt quá 150 ký tự.");
+                return new ValidationResult("Email must not exceed 150 characters.");
             }
             
             string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             if (!Regex.IsMatch(email, emailPattern))
             {
-                return new ValidationResult("Định dạng Email không hợp lệ.");
+                return new ValidationResult("Invalid Email Format.");
             }
             return ValidationResult.Success;
         }
@@ -69,11 +70,11 @@ namespace BeautySoftBE.Models
             var password = value as string;
             if (string.IsNullOrEmpty(password))
             {
-                return new ValidationResult("Mật khẩu không được bỏ trống.");
+                return new ValidationResult("Password cannot be left blank.");
             }
             if (password.Length < 6)
             {
-                return new ValidationResult("Mật khẩu phải có ít nhất 6 ký tự.");
+                return new ValidationResult("Password must be at least 6 characters long.");
             }
             return ValidationResult.Success;
         }

@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BeautySoftBE.Application.DTOs;
+using BeautySoftBE.Data;
+using BeautySoftBE.Middleware;
 using BeautySoftBE.Repositories;
 
 namespace BeautySoftBE.Controllers
@@ -20,7 +22,7 @@ namespace BeautySoftBE.Controllers
         private readonly IAuthService _authService;
         private readonly IUserRepository _userRepository;
 
-        public UsersController(IUserService userService, IAuthService authService, IUserRepository userRepository)
+        public UsersController( IUserService userService, IAuthService authService, IUserRepository userRepository)
         {
             _userService = userService;
             _authService = authService;
@@ -119,5 +121,76 @@ namespace BeautySoftBE.Controllers
                 return Convert.ToBase64String(bytes);
             }
         }
+        
+        [AdminAuthorize]
+        [HttpPut("me/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UserRequestDTO user, [FromForm] string? newPassword, [FromForm] IFormFile? imageFile)
+        {
+            if (user == null)
+            {
+                return BadRequest("User data is missing.");
+            }
+        
+            var userModel = await _userRepository.GetEmailByUsernameAsync(user.Email);
+            if (user.Password != null)
+            {
+                if (string.IsNullOrEmpty(newPassword))
+                {
+                    return BadRequest("New password is required.");
+                }
+                
+                if (newPassword.Length < 6)
+                {
+                    return BadRequest("New password must be at least 6 characters long.");
+                }
+
+                if (!VerifyPassword(user.Password, userModel.Password))
+                {
+                    return BadRequest("Old password does not match.");
+                }
+            }
+
+            
+            user.Id = id;
+        
+            var result = await _userService.UpdateAsync(user, newPassword, imageFile);
+            if (!result) return NotFound("No user found to update.");
+        
+            return NoContent();
+        }
+        
+        [AdminAuthorize]
+        [HttpGet("all")]
+        public async Task<ActionResult<List<UserModel>>> GetAllUsers()
+        {
+            var users = await _userService.GetAllAsync();
+            if (users == null || users.Count == 0)
+            {
+                return NotFound("No users found.");
+            }
+            return Ok(users);
+        }
+        
+        [AdminAuthorize]
+        [HttpPut("block/{userId}")]
+        public async Task<IActionResult> BlockUser(string userId)
+        {
+            int userIdInt = int.Parse(userId);
+            var result = await _userService.BlockUserAsync(userIdInt);
+            if (!result) return NotFound("User not found.");
+            return Ok("User has been blocked.");
+        }
+        
+        [AdminAuthorize]
+        [HttpPut("unblock/{userId}")]
+        public async Task<IActionResult> UnblockUser(string userId)
+        {
+            int userIdInt = int.Parse(userId);
+            var result = await _userService.UnblockUserAsync(userIdInt);
+            if (!result) return NotFound("User not found.");
+
+            return Ok("User has been unblocked.");
+        }
+
     }
 }

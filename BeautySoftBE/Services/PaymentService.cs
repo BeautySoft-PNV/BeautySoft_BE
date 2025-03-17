@@ -1,16 +1,19 @@
+using BeautySoftBE.Data;
 using BeautySoftBE.Library;
 using BeautySoftBE.Models;
 using BeautySoftBE.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeautySoftBE.Services;
 
 public class PaymentService : IPaymentService
 {
     private readonly IConfiguration _configuration;
-    
-    public PaymentService( IConfiguration configuration)
+    private readonly ApplicationDbContext _context;
+    public PaymentService( IConfiguration configuration, ApplicationDbContext context)
     {
         _configuration = configuration;
+        _context = context;
     }
 
     public string CreatePaymentUrl(PaymentInformationModel model, HttpContext context)
@@ -55,4 +58,5 @@ public class PaymentService : IPaymentService
         }
         return response;
     }
+    
 }

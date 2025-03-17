@@ -12,9 +12,9 @@ public class CombinedController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
-    private const string CohereApiKey = "k1gbkCVHtgXASIb1Xl0Z9ojo9EArSfW8OrO10YeV";
+    private const string CohereApiKey = "QfxebFPxw8j2Ef05rTaDqdJxZHhO2td1NQPUAKRe";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-MqjP55RO2PtGLdSaBLSb2kCZgkteEiUpJF2SjK8u94iJq5j5";
+    private const string StabilityApiKey = "sk-eIkjo88BMyPyEyJ4jdSNynyLcok6pFjgl8IxRLzXoSGabiF9";
 
     public CombinedController(IHttpClientFactory httpClientFactory)
     {
@@ -85,7 +85,7 @@ public class CombinedController : ControllerBase
                 form.Add(maskContent);
             }
 
-            var promptContent = new StringContent(generatedPrompt);
+            var promptContent = new StringContent(text);
             
             promptContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
             {
@@ -127,7 +127,7 @@ public class CombinedController : ControllerBase
                 var resultString = await stabilityResponse.Content.ReadAsStringAsync();
                 return Ok(new
                 {
-                    generatedPrompt = generatedPrompt,
+                    generatedPrompt = promptContent,
                     message = "Response is not an image",
                     contentType,
                     resultString

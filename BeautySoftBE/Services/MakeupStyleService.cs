@@ -2,16 +2,20 @@
 using BeautySoftBE.Data;
 using BeautySoftBE.Models;
 using Microsoft.EntityFrameworkCore;
+using Supabase;
+
 
 namespace BeautySoftBE.Services;
 
 public class MakeupStyleService : IMakeupStyleService
 {
     private readonly ApplicationDbContext _context;
+    private readonly Client _supabase;
 
-    public MakeupStyleService(ApplicationDbContext context)
+    public MakeupStyleService(ApplicationDbContext context, Client supabase)
     {
         _context = context;
+        _supabase = supabase;
     }
 
     public async Task<IEnumerable<MakeupStyleModel>> GetAllAsync()
@@ -35,21 +39,31 @@ public class MakeupStyleService : IMakeupStyleService
         {
             try
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
                 string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                string filePath = uniqueFileName;
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                using (var memoryStream = new MemoryStream())
                 {
-                    await imageFile.CopyToAsync(fileStream);
+                    await imageFile.CopyToAsync(memoryStream);
+                    var fileBytes = memoryStream.ToArray();
+                    var storage = _supabase.Storage.From("sinh");
+                    await storage.Upload(fileBytes, filePath);
+                    var publicUrl = storage.GetPublicUrl(filePath);
+
+                    if (!string.IsNullOrEmpty(makeupStyle.Image))
+                    {
+                        try
+                        {
+                            await storage.Remove(new List<string> { Path.GetFileName(makeupStyle.Image) });
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Error deleting old image from Supabase Storage", ex);
+                        }
+                    }
+
+                    makeupStyle.Image = publicUrl;
                 }
-                
-                makeupStyle.Image = $"/uploads/{uniqueFileName}";
             }
             catch (Exception ex)
             {

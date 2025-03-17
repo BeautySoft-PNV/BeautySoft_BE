@@ -30,7 +30,7 @@ namespace BeautySoftBE.Controllers
 
             var userId = GetUserIdFromToken(token);
 
-            bool exists = _context.ManagerStorages.Any(ms => ms.UserId == userId);
+            bool exists = _context.Payments.Any(ms => ms.UserId == userId);
 
             return Ok(new { status = exists });
         }

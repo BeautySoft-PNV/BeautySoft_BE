@@ -9,5 +9,8 @@ namespace BeautySoftBE.Services
         Task<UserModel?> GetByIdAsync(int id);
         Task<bool> UpdateAsync(UserRequestDTO user,String newPassword, IFormFile? imageFile);
         Task<bool> DeleteAsync(int id);
+        Task<List<UserModel>> GetAllAsync();
+        Task<bool> BlockUserAsync(int userId);
+        Task<bool> UnblockUserAsync(int userId);
     }
 }

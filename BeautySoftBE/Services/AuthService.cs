@@ -47,7 +47,16 @@ public class AuthService : IAuthService
         {
             return null;
         }
-
+        if (user.IsBlocked)
+        {
+            return "BLOCKED";
+        }
+        return GenerateJwtToken(user);
+    }
+    
+    public async Task<string?> RefreshToken(string email)
+    {
+        var user = await _userRepository.GetEmailByUsernameAsync(email);
         return GenerateJwtToken(user);
     }
 
@@ -90,4 +99,5 @@ public class AuthService : IAuthService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+    
 }

@@ -36,7 +36,7 @@ namespace BeautySoftBE.Controllers
             var makeupItem = await _makeupItemService.GetByIdAsync(id);
             if (makeupItem == null)
             {
-                return NotFound(new { message = "Không tìm thấy Makeup Item." });
+                return NotFound(new { message = "Makeup Item not found." });
             }
 
             return Ok(makeupItem);
@@ -55,7 +55,7 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token" });
+                return Unauthorized(new { message = "Unable to determine UserId from token" });
             }
 
             var makeupItems = await _makeupItemService.GetByUserIdAsync(userId.Value);
@@ -82,7 +82,7 @@ namespace BeautySoftBE.Controllers
                 var userId = GetUserIdFromToken(token);
                 if(userId != null){    makeupItem.UserId = userId.Value;}
                 
-                bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
+                bool userHasStorage = await _context.Payments.AnyAsync(ms => ms.UserId == userId);
 
                 if (!userHasStorage)
                 {
@@ -103,8 +103,8 @@ namespace BeautySoftBE.Controllers
             }
         }
         
-        [HttpPut]
-        public async Task<IActionResult> PutMakeupItem(MakeupItemModel makeupItemDto, IFormFile imageFile)
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> PutMakeupItem(string id, MakeupItemModel makeupItemDto, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
             {
@@ -129,7 +129,7 @@ namespace BeautySoftBE.Controllers
                 return Forbid("You can only update your own products.");
             }
 
-            var result = await _makeupItemService.UpdateAsync(makeupItemDto, imageFile);
+            var result = await _makeupItemService.UpdateAsync(id, makeupItemDto, imageFile);
             if (!result)
             {
                 return NotFound();

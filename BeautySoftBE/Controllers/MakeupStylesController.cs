@@ -53,7 +53,7 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
              if(userId != null){ makeup.UserId = userId.Value;}
             
-            bool userHasStorage = await _context.ManagerStorages.AnyAsync(ms => ms.UserId == userId);
+            bool userHasStorage = await _context.Payments.AnyAsync(ms => ms.UserId == userId);
 
             if (!userHasStorage)
             {

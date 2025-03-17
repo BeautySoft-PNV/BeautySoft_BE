@@ -1,5 +1,7 @@
 ﻿using BeautySoftBE.Data;
+using BeautySoftBE.Middleware;
 using BeautySoftBE.Models;
+using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeautySoftBE.Controllers
@@ -8,14 +10,14 @@ namespace BeautySoftBE.Controllers
     [ApiController]
     public class PaymentController : Controller
     {
-        private readonly IPaymentService _paymentService;
         private readonly IPaymentService _vnPayService;
         private readonly ApplicationDbContext _context;
-        public PaymentController(IPaymentService vnPayService, ApplicationDbContext context)
+        private readonly IManagerStorageService _storageService;
+        public PaymentController(IPaymentService vnPayService, ApplicationDbContext context, IManagerStorageService storageService)
         {
-		
             _vnPayService = vnPayService;
             _context = context;
+            _storageService = storageService;
         }
 
         public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
@@ -23,6 +25,20 @@ namespace BeautySoftBE.Controllers
             var url = _vnPayService.CreatePaymentUrl(model, HttpContext);
 
             return  Ok(new { paymentUrl = url });
+        }
+        
+        [AdminAuthorize]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetPaymentAll()
+        {
+            var payments = await _storageService.GetAllPaymentsAsync();
+
+            if (payments == null || payments.Count == 0)
+            {
+                return Ok(new List<object>()); 
+            }
+
+            return Ok(payments);
         }
         
         [HttpGet("confirm")]
@@ -48,13 +64,13 @@ namespace BeautySoftBE.Controllers
 
             if (!DateTime.TryParseExact(payDate, "yyyyMMddHHmmss", null, System.Globalization.DateTimeStyles.None, out DateTime dateTimeStart))
             {
-                return BadRequest("Lỗi: Định dạng ngày tháng không hợp lệ.");
+                return BadRequest("Error: Invalid date format.");
             }
             DateTime dateTimeEnd = dateTimeStart.AddMonths(1);
 
             if (responseCode == "00" && transactionStatus == "00")
             {
-                var payment = new ManagerStorageModel()
+                var payment = new PaymentModel()
                 {
                     UserId = int.Parse(userId),
                     TypeStorageId = typeStorageId,
@@ -62,7 +78,7 @@ namespace BeautySoftBE.Controllers
                     DateTimeEnd = dateTimeEnd
                 };
 
-                _context.ManagerStorages.Add(payment);
+                _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
                 
                 var notification = new NotificationHistoryModel()
@@ -89,7 +105,7 @@ namespace BeautySoftBE.Controllers
             }
             else
             {
-                ViewBag.Message = "Thanh toán thất bại. Vui lòng thử lại.";
+                ViewBag.Message = "Payment failed. Please try again.";
                 ViewBag.IsSuccess = false;
                 return View("PaymentResult");
             }

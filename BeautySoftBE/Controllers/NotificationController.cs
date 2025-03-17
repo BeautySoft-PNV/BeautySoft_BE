@@ -30,7 +30,7 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (!userId.HasValue)
             {
-                return BadRequest("Không tìm thấy ID người dùng hợp lệ.");
+                return BadRequest("No valid user ID found.");
             }
 
             var notifications = await _notificationService.GetNotificationsByUserIdAsync(userId.Value);
@@ -56,16 +56,16 @@ namespace BeautySoftBE.Controllers
             var userId = GetUserIdFromToken(token);
             if (!userId.HasValue)
             {
-                return BadRequest("Không tìm thấy ID người dùng hợp lệ.");
+                return BadRequest("No valid user ID found.");
             }
 
             var success = await _notificationService.DeleteNotificationAsync(notificationId, userId.Value);
             if (!success)
             {
-                return NotFound("Không tìm thấy thông báo để xóa.");
+                return NotFound("No messages found to delete.");
             }
 
-            return Ok(new { message = "Xóa thông báo thành công." });
+            return Ok(new { message = "Notification deleted successfully." });
         }
 
     }

@@ -1,16 +1,18 @@
 ﻿using BeautySoftBE.Data;
 using BeautySoftBE.Models;
 using Microsoft.EntityFrameworkCore;
+using Supabase;
 
 namespace BeautySoftBE.Services
 {
     public class MakeupItemService : IMakeupItemService
     {
         private readonly ApplicationDbContext _context;
-
-        public MakeupItemService(ApplicationDbContext context)
+        private readonly Client _supabase;
+        public MakeupItemService(ApplicationDbContext context, Client supabase)
         {
             _context = context;
+            _supabase = supabase;
         }
 
         public async Task<IEnumerable<MakeupItemModel>> GetAllAsync()
@@ -29,54 +31,51 @@ namespace BeautySoftBE.Services
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-            public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
+        public async Task<MakeupItemModel> CreateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
+        {
+            if (makeupItem == null)
             {
-                if (makeupItem == null)
-                {
-                    throw new ArgumentNullException(nameof(makeupItem), "Dữ liệu không hợp lệ.");
-                }
-
-                var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
-                if (!userExists)
-                {
-                    throw new Exception("UserId does not exist in the system.");
-                }
-
-                // Lưu ảnh vào thư mục trong source
-                if (imageFile != null && imageFile.Length > 0)
-                {
-                    try
-                    {
-                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await imageFile.CopyToAsync(fileStream);
-                        }
-                        
-                        makeupItem.Image = $"/uploads/{uniqueFileName}";
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception("Error saving image to server", ex);
-                    }
-                }
-
-                _context.MakeupItems.Add(makeupItem);
-                await _context.SaveChangesAsync();
-                return makeupItem;
+                throw new ArgumentNullException(nameof(makeupItem), "Dữ liệu không hợp lệ.");
             }
 
-        public async Task<bool> UpdateAsync(MakeupItemModel makeupItem, IFormFile imageFile)
+            var userExists = await _context.Users.AnyAsync(u => u.Id == makeupItem.UserId);
+            if (!userExists)
+            {
+                throw new Exception("UserId does not exist in the system.");
+            }
+            
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                try
+                {
+                    string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
+                    string filePath = uniqueFileName;
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await imageFile.CopyToAsync(memoryStream);
+                        var fileBytes = memoryStream.ToArray();
+                        var storage = _supabase.Storage.From("sinh");
+                        await storage.Upload(fileBytes, filePath);
+                        var publicUrl = storage.GetPublicUrl(filePath);
+                        makeupItem.Image = publicUrl;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error saving image to Supabase Storage", ex);
+                }
+            }
+
+            _context.MakeupItems.Add(makeupItem);
+            await _context.SaveChangesAsync();
+            return makeupItem;
+        }
+
+
+        public async Task<bool> UpdateAsync(string id, MakeupItemModel makeupItem, IFormFile imageFile)
         {
-            var existingItem = await _context.MakeupItems.FindAsync(makeupItem.Id);
+            var existingItem = await _context.MakeupItems.FindAsync(id);
             if (existingItem == null)
             {
                 throw new KeyNotFoundException("No makeup products found.");
@@ -84,39 +83,40 @@ namespace BeautySoftBE.Services
 
             existingItem.Name = makeupItem.Name;
             existingItem.Description = makeupItem.Description;
-
-            // Lưu ảnh vào thư mục trong source
+    
             if (imageFile != null && imageFile.Length > 0)
             {
                 try
                 {
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
                     string uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    string filePath = uniqueFileName;
 
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    using (var memoryStream = new MemoryStream())
                     {
-                        await imageFile.CopyToAsync(fileStream);
-                    }
-                    
-                    if (!string.IsNullOrEmpty(existingItem.Image))
-                    {
-                        string oldFilePath = Path.Combine(uploadsFolder, Path.GetFileName(existingItem.Image));
-                        if (File.Exists(oldFilePath))
+                        await imageFile.CopyToAsync(memoryStream);
+                        var fileBytes = memoryStream.ToArray();
+                        var storage = _supabase.Storage.From("sinh");
+                        await storage.Upload(fileBytes, filePath);
+                        var publicUrl = storage.GetPublicUrl(filePath);
+                
+                        if (!string.IsNullOrEmpty(existingItem.Image))
                         {
-                            File.Delete(oldFilePath);
+                            try
+                            {
+                                await storage.Remove(new List<string> { Path.GetFileName(existingItem.Image) });
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception("Error deleting old image from Supabase Storage", ex);
+                            }
                         }
+                
+                        existingItem.Image = publicUrl;
                     }
-                    existingItem.Image = $"/uploads/{uniqueFileName}";
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error updating image on server", ex);
+                    throw new Exception("Error updating image on Supabase Storage", ex);
                 }
             }
 
