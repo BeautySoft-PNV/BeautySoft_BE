@@ -21,10 +21,6 @@ public class CustomPasswordValidation : ValidationAttribute
         {
             return new ValidationResult("Password is required.");
         }
-        if (password.Length < 6)
-        {
-            return new ValidationResult("Password must be at least 6 characters.");
-        }
         return ValidationResult.Success;
     }
 }

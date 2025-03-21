@@ -44,12 +44,13 @@ namespace BeautySoftBE.Repositories
         
         public async Task<UserModel?> GetEmailByUsernameAsync(string email)
         {
-            return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
+            return await _context.Users
+                .SingleOrDefaultAsync(u => EF.Functions.Collate(u.Email, "SQL_Latin1_General_CP1_CS_AS") == email);
         }
         
-        public async Task<bool> UserExistsAsync(string username)
+        public async Task<bool> UserExistsAsync(string email)
         {
-            return await _context.Users.AnyAsync(u => u.Name == username);
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         public async Task AddUserAsync(UserModel user)

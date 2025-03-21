@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Supabase;
+using Polly;
+using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(provider =>
@@ -83,11 +85,30 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JWTService>();
+builder.Services.AddHttpClient("Cohere", client =>
+    {
+        client.BaseAddress = new Uri("https://api.cohere.ai/");
+        client.Timeout = TimeSpan.FromMinutes(5);
+    })
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
+builder.Services.AddHttpClient("Stability", client =>
+    {
+        client.BaseAddress = new Uri("https://api.stability.ai/");
+        client.Timeout = TimeSpan.FromMinutes(5);
+    })
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
            .LogTo(Console.WriteLine, LogLevel.Information));
 
+builder.Services.AddDbContext<ApplicationDbContext>();
+
+builder.Services.AddHostedService<ExpiredMakeupItemChecker>();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();

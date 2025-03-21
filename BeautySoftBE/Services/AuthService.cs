@@ -24,7 +24,7 @@ public class AuthService : IAuthService
 
     public async Task<string> RegisterAsync(RegisterDTO model)
     {
-        if (await _userRepository.UserExistsAsync(model.Username))
+        if (await _userRepository.UserExistsAsync(model.Email))
         {
             return"Account already exists!";
         }

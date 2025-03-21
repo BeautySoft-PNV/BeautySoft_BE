@@ -6,6 +6,7 @@ namespace BeautySoftBE.Models
 {
     public class MakeupItemModel
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]

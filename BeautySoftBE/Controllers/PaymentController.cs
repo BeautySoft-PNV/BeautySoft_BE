@@ -3,6 +3,7 @@ using BeautySoftBE.Middleware;
 using BeautySoftBE.Models;
 using BeautySoftBE.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeautySoftBE.Controllers
 {
@@ -84,12 +85,16 @@ namespace BeautySoftBE.Controllers
                 var notification = new NotificationHistoryModel()
                 {
                     UserId = int.Parse(userId),
-                    NotificationId = 3,
+                    NotificationId = 1,
                     Title = "Payment"
                 };
-
-                _context.NotificationHistories.Add(notification);
-                await _context.SaveChangesAsync();
+                var isExist = await _context.NotificationHistories
+                    .AnyAsync(n => n.UserId == notification.UserId && n.Title == notification.Title);
+                if (!isExist)
+                {
+                    _context.NotificationHistories.Add(notification);
+                    await _context.SaveChangesAsync();
+                }
                 bool isSuccess = (responseCode == "00" && transactionStatus == "00");
                 ViewBag.IsSuccess = isSuccess;
                 ViewBag.TypeStorageName = typeStorage?.Name;

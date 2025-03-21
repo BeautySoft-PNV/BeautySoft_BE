@@ -12,9 +12,9 @@ public class CombinedController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
-    private const string CohereApiKey = "QfxebFPxw8j2Ef05rTaDqdJxZHhO2td1NQPUAKRe";
+    private const string CohereApiKey = "XWMdoozRvfmxeUWX5apNOC7dp143s1WmaFfelTxQ";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-eIkjo88BMyPyEyJ4jdSNynyLcok6pFjgl8IxRLzXoSGabiF9";
+    private const string StabilityApiKey = "sk-daBYnFDCcXUg6iTrmmQ8rIbNywHp9jy6JuiU9xzKZf4viHWO";
 
     public CombinedController(IHttpClientFactory httpClientFactory)
     {
@@ -25,6 +25,7 @@ public class CombinedController : ControllerBase
     public async Task<IActionResult> GenerateAndInpaint([FromForm] CombinedRequestDTO request)
     {
         var cohereClient = _httpClientFactory.CreateClient();
+        cohereClient.Timeout = TimeSpan.FromMinutes(5);
         cohereClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CohereApiKey);
 
         var cohereRequestData = new
@@ -54,9 +55,6 @@ public class CombinedController : ControllerBase
         {
              text = doc.RootElement.GetProperty("text").GetString();
         }
-        
-        string translatedText = await TranslateText(text, "vi", "en");
-        var generatedPrompt = translatedText;
 
         var stabilityClient = _httpClientFactory.CreateClient();
         stabilityClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", StabilityApiKey);
@@ -92,6 +90,13 @@ public class CombinedController : ControllerBase
                 Name = "\"prompt\""
             };
             form.Add(promptContent);
+            
+            var negativePromptContent = new StringContent("European, blonde, blue eyes, western features, pale skin, high nose bridge, oval face, sharp jawline, western makeup style", Encoding.UTF8);
+            negativePromptContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"negative_prompt\""
+            };
+            form.Add(negativePromptContent);
 
             var outputFormatContent = new StringContent(request.OutputFormat ?? "webp");
             outputFormatContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
@@ -114,11 +119,10 @@ public class CombinedController : ControllerBase
             {
                 var resultData = await stabilityResponse.Content.ReadAsByteArrayAsync();
                 var base64Image = Convert.ToBase64String(resultData);
-                string finalTranslatedText = await TranslateText(generatedPrompt, "en", "vi");
 
                 return Ok(new
                 {
-                    generatedPrompt = finalTranslatedText,
+                    generatedPrompt = text,
                     imageData = $"data:{contentType};base64,{base64Image}"
                 });
             }
@@ -135,33 +139,6 @@ public class CombinedController : ControllerBase
             }
         }
     }
-    private async Task<string> TranslateText(string text, string sourceLang, string targetLang)
-    {
-        var client = new RestClient("https://api.mymemory.translated.net/get");
-        int maxChunkSize = 500;
-        List<string> translatedParts = new List<string>();
-
-        for (int i = 0; i < text.Length; i += maxChunkSize)
-        {
-            string chunk = text.Substring(i, Math.Min(maxChunkSize, text.Length - i));
-            var request = new RestRequest();
-            request.Method = Method.Get;
-            request.AddParameter("q", chunk);
-            request.AddParameter("langpair", $"{sourceLang}|{targetLang}");
-
-            var response = await client.ExecuteAsync(request);
-
-            if (response.IsSuccessful)
-            {
-                var json = JsonDocument.Parse(response.Content);
-                string translatedChunk = json.RootElement.GetProperty("responseData").GetProperty("translatedText").GetString();
-                translatedParts.Add(translatedChunk);
-            }
-        }
-
-        return string.Join(" ", translatedParts);
-    }
-
 }
 
 

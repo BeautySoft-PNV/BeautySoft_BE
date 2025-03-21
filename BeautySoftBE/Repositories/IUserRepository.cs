@@ -11,7 +11,7 @@ namespace BeautySoftBE.Repositories
         Task<bool> DeleteAsync(int id);
         Task AddUserAsync(UserModel user);
         string GetRoleNameById(int roleId);
-        Task<bool> UserExistsAsync(string username);
+        Task<bool> UserExistsAsync(string email);
         Task<UserModel?> GetEmailByUsernameAsync(string email);
     }
 }

@@ -1,4 +1,5 @@
-﻿using BeautySoftBE.Data;
+﻿using BeautySoftBE.Application.DTOs;
+using BeautySoftBE.Data;
 using BeautySoftBE.Models;
 using Microsoft.EntityFrameworkCore;
 using Supabase;
@@ -20,6 +21,7 @@ namespace BeautySoftBE.Services
             return await _context.MakeupItems
                 .Include(m => m.User)
                 .Include(m => m.MakeupItemStyles)
+                .OrderByDescending(m => m.Id)
                 .ToListAsync();
         }
 
@@ -73,9 +75,10 @@ namespace BeautySoftBE.Services
         }
 
 
-        public async Task<bool> UpdateAsync(string id, MakeupItemModel makeupItem, IFormFile imageFile)
+        public async Task<bool> UpdateAsync(string id, MakeupItemRequestDTO makeupItem, IFormFile imageFile)
         {
-            var existingItem = await _context.MakeupItems.FindAsync(id);
+            int numericId = int.Parse(id);
+            var existingItem = await _context.MakeupItems.FindAsync(numericId);
             if (existingItem == null)
             {
                 throw new KeyNotFoundException("No makeup products found.");

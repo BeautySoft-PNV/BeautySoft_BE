@@ -16,32 +16,30 @@ public class NotificationService : INotificationService
     public async Task<List<object>> GetNotificationsByUserIdAsync(int userId)
     {
         var notifications = await _context.NotificationHistories
-            .Where(nh => nh.UserId == userId)
+            .Where(nh => nh.UserId == userId && nh.IsBlocked == false) 
             .Select(nh => new 
             {
                 Id = nh.Id,
                 NotificationId = nh.NotificationId,
                 UserId = nh.UserId,
                 Description = nh.Notification.Description,
-                Date = nh.Notification.CreateDate,
+                Date = nh.Date,
                 Title = nh.Title
             })
             .ToListAsync();
 
-
-        return notifications.Cast<object>().ToList();
+        return notifications.Cast<object>().ToList() ?? new List<object>();
     }
-    
+
     public async Task<bool> DeleteNotificationAsync(int notificationId, int userId)
     {
         var notification = await _context.NotificationHistories
-            .FirstOrDefaultAsync(n => n.NotificationId == notificationId && n.UserId == userId);
+            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
 
         if (notification == null) return false;
-
-        _context.NotificationHistories.Remove(notification);
+        notification.IsBlocked = true;
         await _context.SaveChangesAsync();
+    
         return true;
     }
-
 }

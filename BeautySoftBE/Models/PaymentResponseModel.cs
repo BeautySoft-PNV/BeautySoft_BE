@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BeautySoftBE.Models;
 
 public class PaymentResponseModel
 {
+    [Key]
     public string OrderDescription { get; set; }
     public string TransactionId { get; set; }
     public string OrderId { get; set; }

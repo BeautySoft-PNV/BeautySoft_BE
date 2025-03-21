@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using BeautySoftBE.Application.DTOs;
 using BeautySoftBE.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -103,8 +104,8 @@ namespace BeautySoftBE.Controllers
             }
         }
         
-        [HttpPut("{MakeupItemId}")]
-        public async Task<IActionResult> PutMakeupItem(string id, MakeupItemModel makeupItemDto, IFormFile imageFile)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMakeupItem(string id,[FromForm] MakeupItemRequestDTO makeupItemDto,[FromForm] IFormFile imageFile)
         {
             if (!ModelState.IsValid)
             {

@@ -149,7 +149,6 @@ namespace BeautySoftBE.Controllers
                     return BadRequest("Old password does not match.");
                 }
             }
-
             
             user.Id = id;
         

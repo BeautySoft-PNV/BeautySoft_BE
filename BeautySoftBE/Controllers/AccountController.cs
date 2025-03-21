@@ -50,10 +50,24 @@ public class AccountController : Controller
             return NotFound(new { message = "Email does not exist!" });
 
         var token = GenerateJwtToken(user);
-        var resetLink = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
-
-        await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Click on <a href='{resetLink}'>đây</a> to reset password.");
-
+        var resetLink = Url.Action("ResetPassword", "Account", new 
+        { 
+            token, 
+            email = model.Email 
+        }, "http", "192.168.31.183:5280");
+        await _emailSender.SendEmailAsync(model.Email, 
+            "Password Reset Request", 
+            $@"
+                    <p>Dear {model.Email},</p>
+                    <p>We received a request to reset your password. If you did not make this request, please ignore this email.</p>
+                    <p>To reset your password, please click the link below:</p>
+                    <p><a href='{resetLink}' style='color: #1a73e8; text-decoration: none;'>Reset Your Password</a></p>
+                    <p>This link will expire in 60 second for security reasons.</p>
+                    <br>
+                    <p>Best regards,</p>
+                    <p><strong>BeautySoft App</strong></p>
+                ");
+        
         return Ok(new { message = "Password reset email has been sent!" });
     }
     

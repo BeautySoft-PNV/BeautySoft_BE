@@ -20,8 +20,11 @@ public class MakeupStyleService : IMakeupStyleService
 
     public async Task<IEnumerable<MakeupStyleModel>> GetAllAsync()
     {
-        return await _context.MakeupStyles.ToListAsync();
+        return await _context.MakeupStyles
+            .OrderByDescending(m => m.Id)
+            .ToListAsync();
     }
+
 
     public async Task<MakeupStyleModel> GetByIdAsync(int id)
     {

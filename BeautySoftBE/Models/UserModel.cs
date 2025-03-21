@@ -6,6 +6,7 @@ namespace BeautySoftBE.Models
 {
     public class UserModel
     {
+        [Key]
         public int Id { get; set; }
         
         [CustomNameValidation]
