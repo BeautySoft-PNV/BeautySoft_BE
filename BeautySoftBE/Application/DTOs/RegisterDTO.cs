@@ -8,6 +8,7 @@ namespace BeautySoftBE.Application.DTOs;
 
 public class RegisterDTO
 {
+    [Required(ErrorMessage = "Username is required.")]
     [CustomUsernameValidation]
     public string Username { get; set; }
     
@@ -26,8 +27,13 @@ public class CustomUsernameValidation : ValidationAttribute
 {
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
+        if (value == null)
+        {
+            return new ValidationResult("Username is required.");
+        }
+
         var username = value as string;
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             return new ValidationResult("Username is required.");
         }
@@ -38,6 +44,7 @@ public class CustomUsernameValidation : ValidationAttribute
         return ValidationResult.Success;
     }
 }
+
 
 public class CustomEmailRValidation : ValidationAttribute
 {
