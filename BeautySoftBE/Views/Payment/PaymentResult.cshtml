@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "BeautySoft App - Kết quả thanh toán";
+    Layout = null; // Bỏ layout mặc định
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeautySoft App - Payment Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 100%;
+            width: 90%;
+            margin: 20px auto;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .alert-success {
+            color: #fff;
+            background-color: #ED1E51;
+        }
+        .alert-danger {
+            color: #fff;
+            background-color: #d9534f;
+        }
+        .table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .table th {
+            background-color: #ED1E51;
+            color: white;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #ED1E51;
+            color: white;
+            border: none;
+            width: 100%;
+        }
+        @@media (max-width: 600px) {
+        .container {
+            width: 95%;
+            padding: 10px;
+        }
+        .table th, .table td {
+            padding: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            font-size: 14px;
+            padding: 8px 12px;
+        }
+        }
+        
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>BeautySoft Payment Results</h2>
+
+    @if (ViewBag.IsSuccess)
+    {
+        <div class="alert alert-success">
+            <h4>Payment successful!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <h4>Payment failed. Please try again.</h4>
+        </div>
+    }
+
+    <h3>Transaction Details:</h3>
+    <table class="table">
+        <tr><th>Service Type</th><td>@ViewBag.TypeStorageName</td></tr>
+        <tr><th>Amount</th><td>@ViewBag.Amount</td></tr>
+        <tr><th>Bank Code</th><td>@ViewBag.BankCode</td></tr>
+        <tr><th>Bank Transaction Code</th><td>@ViewBag.BankTranNo</td></tr>
+        <tr><th>Card Type</th><td>@ViewBag.CardType</td></tr>
+        <tr><th>Order Info</th><td>@ViewBag.OrderInfo</td></tr>
+        <tr><th>Payment Date</th><td>@ViewBag.PayDate</td></tr>
+        <tr><th>VNPay Transaction Code</th><td>@ViewBag.TransactionNo</td></tr>
+        <tr><th>Reference Code</th><td>@ViewBag.TxnRef</td></tr>
+    </table>
+</div>
+</body>
+</html>

@@ -21,17 +21,24 @@ namespace BeautySoftBE.Controllers
         [HttpGet("user/me")]
         public async Task<ActionResult<IEnumerable<MakeupItemStyleModel>>> GetMyMakeupItemStyles()
         {
-            var userId = GetUserIdFromToken();
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+
+            var userId = GetUserIdFromToken(token);
             if (!userId.HasValue)
             {
-                return Unauthorized(new { message = "Không thể xác định UserId từ token." });
+                return Unauthorized(new { message = "Unable to determine UserId from token." });
             }
 
             var makeupItemStyles = await _makeupItemStyleService.GetByUserIdAsync(userId.Value);
 
             if (makeupItemStyles == null || !makeupItemStyles.Any())
             {
-                return NotFound(new { message = "Không tìm thấy phong cách trang điểm nào." });
+                return NotFound(new { message = "No makeup styles found." });
             }
 
             return Ok(makeupItemStyles);
@@ -42,28 +49,28 @@ namespace BeautySoftBE.Controllers
         {
             if (makeupItemStyle == null)
             {
-                return BadRequest("Dữ liệu không hợp lệ.");
+                return BadRequest("Invalid data.");
             }
             
             if (makeupItemStyle.MakeupItemId == 0 || makeupItemStyle.MakeupStyleId == 0)
             {
-                return BadRequest("MakeupItemId và MakeupStyleId không được để trống.");
+                return BadRequest("MakeupItemId and MakeupStyleId cannot be empty.");
             }
             
             var isValid = await _makeupItemStyleService.ValidateMakeupItemAndStyleAsync(makeupItemStyle.MakeupItemId, makeupItemStyle.MakeupStyleId);
             if (!isValid)
             {
-                return NotFound("MakeupItemId hoặc MakeupStyleId không tồn tại.");
+                return NotFound("MakeupItemId or MakeupStyleId does not exist.");
             }
             
             var userExists = await _makeupItemStyleService.ValidateUserAsync(makeupItemStyle.UserId);
             if (!userExists)
             {
-                return NotFound("UserId không tồn tại trong hệ thống.");
+                return NotFound("UserId does not exist in the system.");
             }
             
             await _makeupItemStyleService.CreateAsync(makeupItemStyle);
-            return Ok("MakeupItemStyle được tạo thành công!");
+            return Ok("MakeupItemStyle created successfully!");
         }
     }
 }

@@ -24,11 +24,10 @@ public class AuthService : IAuthService
 
     public async Task<string> RegisterAsync(RegisterDTO model)
     {
-        if (await _userRepository.UserExistsAsync(model.Username))
+        if (await _userRepository.UserExistsAsync(model.Email))
         {
-            return "Tài khoản đã tồn tại!";
+            return"Account already exists!";
         }
-
         var user = new UserModel
         {
             Name = model.Username,
@@ -38,7 +37,7 @@ public class AuthService : IAuthService
         };
 
         await _userRepository.AddUserAsync(user);
-        return "Đăng ký thành công!";
+        return"Registration successful!";
     }
 
     public async Task<string?> LoginAsync(LoginDTO model)
@@ -48,7 +47,16 @@ public class AuthService : IAuthService
         {
             return null;
         }
-
+        if (user.IsBlocked)
+        {
+            return "BLOCKED";
+        }
+        return GenerateJwtToken(user);
+    }
+    
+    public async Task<string?> RefreshToken(string email)
+    {
+        var user = await _userRepository.GetEmailByUsernameAsync(email);
         return GenerateJwtToken(user);
     }
 
@@ -91,4 +99,5 @@ public class AuthService : IAuthService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+    
 }

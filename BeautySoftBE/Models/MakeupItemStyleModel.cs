@@ -9,13 +9,13 @@ namespace BeautySoftBE.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "MakeupItemId không được để trống.")]
+        [Required(ErrorMessage = "MakeupItemId cannot be empty.")]
         public int MakeupItemId { get; set; }
 
-        [Required(ErrorMessage = "MakeupStyleId không được để trống.")]
+        [Required(ErrorMessage = "MakeupStyleId cannot be empty.")]
         public int MakeupStyleId { get; set; }
 
-        [Required(ErrorMessage = "UserId không được để trống.")]
+        [Required(ErrorMessage = "UserId cannot be blank.")]
         public int UserId { get; set; }
         
         [ForeignKey(nameof(MakeupItemId))]

@@ -16,7 +16,6 @@ namespace BeautySoftBE.Data
         public DbSet<MakeupStyleModel> MakeupStyles { get; set; }
         public DbSet<MakeupItemStyleModel> MakeupItemStyles { get; set; }
         public DbSet<TypeStorageModel> TypeStorages { get; set; }
-        public DbSet<ManagerStorageModel> ManagerStorages { get; set; }
         public DbSet<PaymentModel> Payments { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<NotificationHistoryModel> NotificationHistories { get; set; }
@@ -53,28 +52,16 @@ namespace BeautySoftBE.Data
                 .HasForeignKey(e => e.MakeupItemId)
                 .OnDelete(DeleteBehavior.NoAction);
             
-            modelBuilder.Entity<ManagerStorageModel>()
+            modelBuilder.Entity<PaymentModel>()
                 .HasOne(ms => ms.User)
                 .WithMany()
                 .HasForeignKey(ms => ms.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ManagerStorageModel>()
+            modelBuilder.Entity<PaymentModel>()
                 .HasOne(ms => ms.TypeStorage)
                 .WithMany()
                 .HasForeignKey(ms => ms.TypeStorageId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<PaymentModel>()
-                .HasOne(p => p.User)
-                .WithMany()
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<PaymentModel>()
-                .HasOne(p => p.TypeStorage)
-                .WithMany()
-                .HasForeignKey(p => p.TypeStorageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<NotificationHistoryModel>()
