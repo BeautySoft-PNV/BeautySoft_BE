@@ -122,24 +122,10 @@ namespace BeautySoftBE.Controllers
             }
         }
         
+        [AdminAuthorize]
         [HttpPut("me/{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromForm] UserRequestDTO user, [FromForm] string? newPassword, [FromForm] IFormFile? imageFile)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString();
-            
-            if (token.StartsWith("Bearer "))
-            {
-                token = token.Substring(7).Trim();
-            }
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-
-            if (role != "ADMIN")
-            {
-                return BadRequest("No right.");
-            }
             if (user == null)
             {
                 return BadRequest("User data is missing.");
@@ -172,6 +158,7 @@ namespace BeautySoftBE.Controllers
             return NoContent();
         }
         
+        [AdminAuthorize]
         [HttpGet("all")]
         public async Task<ActionResult<List<UserModel>>> GetAllUsers()
         {
@@ -183,48 +170,20 @@ namespace BeautySoftBE.Controllers
             return Ok(users);
         }
         
+        [AdminAuthorize]
         [HttpPut("block/{userId}")]
         public async Task<IActionResult> BlockUser(string userId)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString();
-            
-            if (token.StartsWith("Bearer "))
-            {
-                token = token.Substring(7).Trim();
-            }
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-
-            if (role != "ADMIN")
-            {
-                return BadRequest("No right.");
-            }
             int userIdInt = int.Parse(userId);
             var result = await _userService.BlockUserAsync(userIdInt);
             if (!result) return NotFound("User not found.");
             return Ok("User has been blocked.");
         }
         
+        [AdminAuthorize]
         [HttpPut("unblock/{userId}")]
         public async Task<IActionResult> UnblockUser(string userId)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString();
-            
-            if (token.StartsWith("Bearer "))
-            {
-                token = token.Substring(7).Trim();
-            }
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-
-            if (role != "ADMIN")
-            {
-                return BadRequest("No right.");
-            }
             int userIdInt = int.Parse(userId);
             var result = await _userService.UnblockUserAsync(userIdInt);
             if (!result) return NotFound("User not found.");
