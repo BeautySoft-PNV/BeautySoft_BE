@@ -26,15 +26,26 @@ namespace BeautySoftBE.Models
         [StringLength(1000, ErrorMessage = "Instructions must not be longer than 1000 characters.")]
         public string Guidance { get; set; }
 
+        private DateTime _dateOfManufacture;
         [Required]
         [DataType(DataType.Date)]
         [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Invalid production date.")]
-        public DateTime DateOfManufacture { get; set; }
+        public DateTime DateOfManufacture
+        {
+            get => _dateOfManufacture;
+            set => _dateOfManufacture = value.Date; 
+        }
 
+        private DateTime _expirationDate;
         [Required]
         [DataType(DataType.Date)]
         [Range(typeof(DateTime), "1/1/1900", "12/31/9999", ErrorMessage = "Invalid expiration date.")]
-        public DateTime ExpirationDate { get; set; }
+        public DateTime ExpirationDate  
+        {
+            get => _expirationDate;
+            set => _expirationDate = value.Date; 
+        }
+        
         public UserModel? User { get; set; }
         public ICollection<MakeupItemStyleModel>? MakeupItemStyles { get; set; }
         
