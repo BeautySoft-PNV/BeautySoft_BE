@@ -46,7 +46,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000",
                 "http://localhost:8081", 
                 "http://192.168.175.183:8081",
-                "https://8827-171-255-169-90.ngrok-free.app" 
+                "https://8827-171-255-169-90.ngrok-free.app",
+                "https://beauty-soft-fe-admin-git-main-1234a4321aas-projects.vercel.app"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
