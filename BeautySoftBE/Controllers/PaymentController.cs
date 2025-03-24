@@ -1,4 +1,5 @@
-﻿using BeautySoftBE.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using BeautySoftBE.Data;
 using BeautySoftBE.Middleware;
 using BeautySoftBE.Models;
 using BeautySoftBE.Services;
@@ -28,10 +29,24 @@ namespace BeautySoftBE.Controllers
             return  Ok(new { paymentUrl = url });
         }
         
-        [AdminAuthorize]
         [HttpGet("all")]
         public async Task<IActionResult> GetPaymentAll()
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString();
+            
+            if (token.StartsWith("Bearer "))
+            {
+                token = token.Substring(7).Trim();
+            }
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+            if (role != "ADMIN")
+            {
+                return BadRequest("No right.");
+            }
             var payments = await _storageService.GetAllPaymentsAsync();
 
             if (payments == null || payments.Count == 0)
