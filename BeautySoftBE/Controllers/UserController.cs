@@ -175,21 +175,6 @@ namespace BeautySoftBE.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<List<UserModel>>> GetAllUsers()
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString();
-            
-            if (token.StartsWith("Bearer "))
-            {
-                token = token.Substring(7).Trim();
-            }
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-
-            if (role != "ADMIN")
-            {
-                return BadRequest("No right.");
-            }
             var users = await _userService.GetAllAsync();
             if (users == null || users.Count == 0)
             {
