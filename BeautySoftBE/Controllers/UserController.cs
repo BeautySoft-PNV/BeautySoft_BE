@@ -14,7 +14,7 @@ using BeautySoftBE.Repositories;
 
 namespace BeautySoftBE.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : BaseController
     {
@@ -27,6 +27,17 @@ namespace BeautySoftBE.Controllers
             _userService = userService;
             _authService = authService;
             _userRepository = userRepository;
+        }
+        
+        [HttpGet("admin/all")]
+        public async Task<ActionResult<List<UserModel>>> GetAllUsers()
+        {
+            var users = await _userService.GetAllAsync();
+            if (users == null || users.Count == 0)
+            {
+                return NotFound("No users found.");
+            }
+            return Ok(users);
         }
 
         [HttpGet("me")]
@@ -122,7 +133,8 @@ namespace BeautySoftBE.Controllers
             }
         }
         
-        [AdminAuthorize]
+        /*
+        [AdminAuthorize]*/
         [HttpPut("me/{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromForm] UserRequestDTO user, [FromForm] string? newPassword, [FromForm] IFormFile? imageFile)
         {
@@ -158,19 +170,11 @@ namespace BeautySoftBE.Controllers
             return NoContent();
         }
         
-        [AdminAuthorize]
-        [HttpGet("all")]
-        public async Task<ActionResult<List<UserModel>>> GetAllUsers()
-        {
-            var users = await _userService.GetAllAsync();
-            if (users == null || users.Count == 0)
-            {
-                return NotFound("No users found.");
-            }
-            return Ok(users);
-        }
+        /*
+        [AdminAuthorize]*/
         
-        [AdminAuthorize]
+        /*
+        [AdminAuthorize]*/
         [HttpPut("block/{userId}")]
         public async Task<IActionResult> BlockUser(string userId)
         {
