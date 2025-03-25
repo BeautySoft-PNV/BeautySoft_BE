@@ -29,14 +29,9 @@ public class CustomUsernameValidation : ValidationAttribute
     {
         if (value == null)
         {
-            return new ValidationResult("Username is required.");
+            return ValidationResult.Success;
         }
-
         var username = value as string;
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            return new ValidationResult("Username is required.");
-        }
         if (username.Length < 3)
         {
             return new ValidationResult("Username must be at least 3 characters.");
