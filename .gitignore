@@ -29,3 +29,10 @@ Desktop.ini
 
 .dockerignore
 .env
+
+appsettings.json
+appsettings.*.json
+*.csproj.user
+Folder.DotSettings/
+Folder.DotSettings.user
+.idea/
