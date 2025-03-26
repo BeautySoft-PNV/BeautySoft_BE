@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BeautySoftBE")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ae3dac6f4b9e2885960309b84bf8fcb3bc613785")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34a90ceddbf36780db84308356e49ba451a69ff7")]
 [assembly: System.Reflection.AssemblyProductAttribute("BeautySoftBE")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BeautySoftBE")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
