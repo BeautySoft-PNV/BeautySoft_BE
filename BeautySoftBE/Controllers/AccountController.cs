@@ -54,7 +54,7 @@ public class AccountController : Controller
         { 
             token, 
             email = model.Email 
-        }, "http", "192.168.31.183:5280");
+        }, "http", "18.142.0.155:5001");
         await _emailSender.SendEmailAsync(model.Email, 
             "Password Reset Request", 
             $@"
