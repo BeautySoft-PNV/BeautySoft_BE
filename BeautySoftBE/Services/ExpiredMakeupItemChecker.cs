@@ -57,7 +57,7 @@ public class ExpiredMakeupItemChecker : BackgroundService
                     var notification = new NotificationHistoryModel
                     {
                         UserId = item.UserId,
-                        NotificationId = 3,
+                        NotificationId = 2,
                         Title = $"Makeup item '{item.Name}' has expired."
                     };
 
