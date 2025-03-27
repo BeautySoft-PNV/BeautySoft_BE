@@ -4,18 +4,16 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using RestSharp;
-
 [Route("api/combined")]
 [ApiController]
 public class CombinedController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private const string CohereApiUrl = "https://api.cohere.ai/generate";
-    private const string CohereApiKey = "IIGYJIzO1ZKNJPW9sBYQiMzjUXy21hjQPjl6eKSG";
+    private const string CohereApiKey = "n00tI0jSlF4GXqNL9ynk40YAAP9GEd9UrKJYfiuk";
     private const string StabilityApiUrl = "https://api.stability.ai/v2beta/stable-image/edit/inpaint";
-    private const string StabilityApiKey = "sk-BbK4gPHoj9y0sA4pNZSz6Dy5xg0tfn84fO0BVYkOv6cDanFx";
-
+    private const string StabilityApiKey = "sk-53ZJHkkEoOkioEYGkWLImplw9MTM8lig0kzZhmaR0oT3wtuf";
+   
     public CombinedController(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
@@ -65,7 +63,7 @@ public class CombinedController : ControllerBase
             var imageContent = new StreamContent(request.Image.OpenReadStream());
             imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
             imageContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-            {
+            {   
                 Name = "\"image\"",
                 FileName = $"\"{request.Image.FileName}\""
             };
@@ -90,19 +88,49 @@ public class CombinedController : ControllerBase
                 Name = "\"prompt\""
             };
             form.Add(promptContent);
-            
-            var negativePromptContent = new StringContent("European, blonde, blue eyes, western features, pale skin, high nose bridge, oval face, sharp jawline, western makeup style", Encoding.UTF8);
+            var negativePromptContent = new StringContent(
+                "no altered ethnicity, no skin tone lightening, no European facial features, no Westernization, no Caucasian features, no unrealistic modifications, no altered face, no identity change, no transformed features, no unrealistic face, no Western facial proportions, no light-colored eyes, no blond or light brown hair, no thin nose bridge, no deep-set eyes, no high nose bridge, no narrow lips, no small thin lips, no Western-style eyebrows, only makeup applied, keep original Asian facial structure, maintain Vietnamese appearance, retain Southeast Asian eye shape, retain natural full lips, keep monolid or epicanthic fold eyes, maintain Vietnamese facial balance", 
+                Encoding.UTF8
+            );
             negativePromptContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
             {
                 Name = "\"negative_prompt\""
             };
+
             form.Add(negativePromptContent);
+            
+            var modelContent = new StringContent("stable-diffusion-xl");
+            modelContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"model\""
+            };
+            form.Add(modelContent);
+            
+            var guidanceScaleContent = new StringContent("5.0");
+            guidanceScaleContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"guidance_scale\""
+            };
+            form.Add(guidanceScaleContent);
+
 
             var outputFormatContent = new StringContent(request.OutputFormat ?? "webp");
             outputFormatContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
             {
                 Name = "\"output_format\""
             };
+            var imageStrengthContent = new StringContent("0.2"); 
+            imageStrengthContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"image_strength\""
+            };
+            form.Add(imageStrengthContent);
+                 var denoisingStrengthContent = new StringContent("0.3");
+        denoisingStrengthContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+        {
+            Name = "\"denoising_strength\""
+        };
+        form.Add(denoisingStrengthContent);
             form.Add(outputFormatContent);
 
             var stabilityResponse = await stabilityClient.PostAsync(StabilityApiUrl, form);
@@ -133,7 +161,7 @@ public class CombinedController : ControllerBase
                 {
                     generatedPrompt = promptContent,
                     message = "Response is not an image",
-                    contentType,
+                    contentType,    
                     resultString
                 });
             }
